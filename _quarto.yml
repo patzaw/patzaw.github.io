@@ -1,0 +1,39 @@
+project:
+  type: website
+
+website:
+  title: "Patrice Godard"
+  site-url: "https://patzaw.github.io"
+  description: "Personal website"
+  google-analytics:
+    tracking-id: "G-7RG3ZVT8WZ"
+    anonymize-ip: true
+  cookie-consent:
+    type: implied
+    style: headline
+  twitter-card:
+    creator: "@PatriceGodard"
+  open-graph: true
+  navbar:
+    title: Patrice Godard
+    left:
+      - href: index.qmd
+        text: About
+    right: 
+      - href: genodesy.html
+        text: GENODESY
+      - href: tools.qmd
+        text: Tools
+      - href: blog.qmd
+        text: Blog
+      - icon: rss
+        href: blog.xml
+  page-footer: 
+    left: "© 2023 Patrice Godard<br>Made with [Quarto](https://quarto.org/)"
+    right: '[License](/license.qmd)<br>[Cookie Preferences]{#open_preferences_center}'
+
+format:
+  html:
+    theme: spacelab
+    css: styles.scss
+    toc: true

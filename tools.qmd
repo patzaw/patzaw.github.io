@@ -1,0 +1,95 @@
+---
+title: "Tools"
+---
+
+Here is a list of [R](https://www.r-project.org/) libraries I developed to support data manipulation and analyses.
+
+<!----------------------------------------------------------------------------->
+## Data knowledge management
+
+### Modeling data with ReDaMoR {#redamor}
+
+::: columns
+::: {.column style="width:15%; padding-right:3px; padding-top:10px;"}
+[![](images/ReDaMoR.png)](https://patzaw.github.io/ReDaMoR/)
+:::
+
+::: {.column style="width:85%; padding-left:10px;"}
+The ReDaMoR (Relational Data ModeleR) package allows the manipulation of relational data models in R. It provides functions to create, import and save relational data models. These functions are also accessible through a graphical user interface made with Shiny.
+
+ - [Package website](https://patzaw.github.io/ReDaMoR/)
+ - [Instance of the Shiny app running at [GENODESY]{.tm}](https://genodesy.org/shiny/ReDaMoR)
+:::
+:::
+
+
+### Managing data with TKCat
+
+::: columns
+::: {.column style="width:15%; padding-right:3px; padding-top:10px;"}
+[![](images/TKCat.png)](https://patzaw.github.io/TKCat/)
+:::
+
+::: {.column style="width:85%; padding-left:10px;"}
+The aim of TKCat (Tailored Knowledge Catalog) is to facilitate the management of data from knowledge resources that are frequently used alone or together in research environments. In TKCat, knowledge resources are manipulated as modeled database (MDB) objects. These objects provide access to the data tables along with a general description of the resource and a detail data model generated with [ReDaMoR](#redamor) documenting the tables, their fields and their relationships. These MDB are then gathered in catalogs that can be easily explored an shared. TKCat provides tools to easily subset, filter and combine MDBs and create new catalogs suited for specific needs.
+
+ - [Package website](https://patzaw.github.io/TKCat/)
+ - [Presentation](https://www.youtube.com/watch?v=hI7Gh145L4Y&t=88s) at the [useR!2022 conference](https://user2022.r-project.org/)
+:::
+:::
+
+<!----------------------------------------------------------------------------->
+## Concept dictionaries
+
+### Biological Entity Dictionary (BED)
+
+::: columns
+::: {.column style="width:15%; padding-right:3px; padding-top:10px;"}
+[![](images/BED.png)](https://patzaw.github.io/BED/)
+:::
+
+::: {.column style="width:85%; padding-left:10px;"}
+The aim of the BED (Biological Entity Dictionary) R package is to get and explore mapping between identifiers of biological entities (BE). This package provides a way to connect to a BED [Neo4j](https://neo4j.com/) database in which the relationships between the identifiers from different sources are recorded.
+
+ - [Package website](https://patzaw.github.io/BED/)
+ - [Publication](https://doi.org/10.12688/f1000research.13925.3)
+ - [Docker image of the database](https://hub.docker.com/r/patzaw/bed-ucb-human/)
+ - An [instance](https://www.genodesy.org/services.htmld#bed) of the BED database is running at [GENODESY]{.tm}
+:::
+:::
+
+
+### Dictionary Of Disease Ontologies (DODO)
+
+The aim of DODO (Dictionary Of Disease Ontologies) is to allow an easier way to interact and explore disease ontologies and their identifiers. The database is build on [Neo4j](https://neo4j.com/) and incorporates different ontologies with an accompagnying R package that allows easy access, exploration, and definition of disease concepts of interest. It can work as the intermediate player to facilitate access and exhaustive extraction of information from other life science databases without the need to harmonize these up front.
+
+ - Co-author: [Liesbeth François](https://github.com/Elysheba)
+ - [Package website](https://github.com/Elysheba/DODO)
+ - [Publication](https://doi.org/10.12688/f1000research.25144.1)
+ - [Docker image of the database](https://hub.docker.com/r/elysheba/public-dodo)
+
+<!----------------------------------------------------------------------------->
+## Bioinformatics
+
+### Phenotype Consensus Analysis (PCAN)
+
+Phenotype Consensus Analysis (PCAN) is an indirect phenotype-based method that quantifies the consensus similarity of genetic disorders linked to the mechanism of a putative disease causing gene. PCAN makes use of widely adopted knowledge resources for protein-protein interactions (e.g. [STRING](https://string-db.org/)) and signaling pathways (e.g. [Reactome](https://reactome.org/)) and the comprehensive [HPO (Human Phenotype Ontology)](https://hpo.jax.org/) annotation resource. This approach allows support for the discovery of novel disease genes and naturally lends itself to the mechanistic deconvolution of diverse phenotypes.
+
+- Co-author: [Matthew Page](https://www.researchgate.net/profile/Matthew-Page-9/)
+- [Package website](http://bioconductor.org/packages/release/bioc/html/PCAN.html)
+- [Publication](https://doi.org/10.1186/s12859-016-1401-2)
+
+<!----------------------------------------------------------------------------->
+## Backend libraries
+
+### neo2R
+
+The aim of the neo2R is to provide simple and low level connectors for querying [Neo4j](https://neo4j.com/) graph databases from R. The objects returned by the query functions are either lists or data.frames with very few post-processing. It allows fast processing of queries returning many records. And it let the user handle post-processing according to the data model and his needs.
+
+- [Package website](https://github.com/patzaw/neo2r)
+
+### ClickHouseHTTP
+
+[ClickHouse](https://clickhouse.com/) is an open-source, high performance columnar OLAP (online analytical processing of queries) database management system for real-time analytics using SQL. This R DBI backend relies on the ClickHouse HTTP interface and support the HTTPS protocol.
+
+- [Package website](https://github.com/patzaw/ClickHouseHTTP)

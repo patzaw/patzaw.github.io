@@ -1,0 +1,204 @@
+---
+title: 'Setting-up [GENODESY]{.tm}'
+date: "2022-11-02"
+description: 'Sharing experience regarding the creation of the [GENODESY]{.tm} website and related web services'
+categories:
+   - infrastructure
+image: "images/Build-website.jpg"
+---
+
+![](images/Build-website.jpg){fig-alt="Website construction illustration adapted from https://commons.wikimedia.org/wiki/File:Build-website.jpg" width="800"}
+
+After having bought the domain name a few years ago, I've finally decided to setup the [GENODESY]{.tm} website and related resources. Here, I share my experience regarding this process: the tools and services I relied on and the design and technical choices I made.
+
+My intend was to setup, not only a website and a blog, but also some services such as [Shiny](https://shiny.rstudio.com/) applications, [Neo4j](https://neo4j.com/) and [ClickHouse](https://clickhouse.com/) databases. That's why I chose to rent a dedicated server that I configured and that I'm administrating myself. I spent time in tuning the configuration of the different services in order to make them as accessible as possible to the users:
+
+-   All the services are reachable from the same root: <https://genodesy.org>.
+-   All the services are provided through the same secure SSL connection.
+
+## Hosting the services
+
+There are many companies providing capabilities for hosting web pages and web services. Here, I chose [OVHCloud](https://www.ovhcloud.com/), a french cloud computing company. I went for the first option in the *kimsufi* range of dedicated servers:
+
+-   CPU: Intel Xeon E3-1245v2 - 4c/8t - 3.4 GHz/3.8 GHz
+-   Memory: 32 GB DDR3
+-   Storage: 3 x 2 TB HDD SATA Soft RAID
+-   OS: Ubuntu Server 22.04 LTS "Jammy Jellyfish"
+
+I also bought the genodesy domain names (.org, .com, .net, .info and .biz) to [OVHCloud](https://www.ovhcloud.com/) and it was easy to map *genodesy.org* to the server IP address in the DNS (Domain Name System) using their configuration tool.
+
+## Web server and reverse proxy
+
+### NGINX configuration {#sec-nginx}
+
+I chose the [NGINX](https://nginx.org/en/) web server to make the website available. NGINX can also be used as a reverse proxy, and I took advantage of this feature to provide other services.
+
+I followed the following tutorials to get familiar with NGINX configuration:
+
+-   [Install NGINX in Ubuntu (digital ocean)](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-20-04)
+-   [Self-signed SSL certificates for NGINX (digital ocean)](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-20-04-1)
+-   Reverse proxy configuration:
+    -   [How to forward an http request to another port?](https://serverfault.com/questions/536576/nginx-how-do-i-forward-an-http-request-to-another-port)
+    -   [Running a Shiny server with a proxy](https://support.rstudio.com/hc/en-us/articles/213733868-Running-Shiny-Server-with-a-Proxy)
+
+I configured the *genodesy.org* server block to setup the following behaviors:
+
+-   redirect http (80) queries to the https (443) port
+-   provide services through the https (443) port using a valid SSL (Secure Sockets Layer) certificate
+-   proxy pass queries to specific path to services using different ports (e.g. shiny or neo4j)
+
+Here is the server block configuration file I've finally written:
+
+``` {.sh filename="/etc/nginx/sites-available/genodesy.org"}
+
+# Queries to the http (80) port are redirected to the https (443) port
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name genodesy.org www.genodesy.org;
+    
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+    
+    root /var/www/genodesy.org/html;
+    index index.html;
+    
+    # The following folder is used to verify the domain of issued SSL
+    # certificate and therefore is still accessible through the http (80) port.
+    location /.well-known/pki-validation/ {
+        try_files $uri $uri/ =404;
+    }
+}
+
+# Services are provided through the https (443) port
+server {
+        listen 443 ssl http2 default_server;
+        listen [::]:443 ssl http2 default_server;
+        
+        # The files included below are used for SSL configuration
+        include snippets/ssl-for-free.conf;
+        include snippets/ssl-params.conf;
+
+
+        root /var/www/genodesy.org/html;
+        index index.html index.htm index.nginx-debian.html;
+        
+        error_page 404 /404.html;
+
+        server_name genodesy.org www.genodesy.org;
+
+        # The main web server
+        location / {
+                try_files $uri $uri/ =404;
+        }
+        
+        # Reverse proxy to the BED Neo4j database hosted on port 5454
+        location /BED {
+            rewrite ^/BED/?(.*)$ /$1 break;
+            proxy_pass http://genodesy.org:5454/browser;
+            proxy_redirect / $scheme://$http_host/BED;
+        }
+        
+        # Reverse proxy to Shiny hosted on port 3838
+        rewrite ^/shiny$ $scheme://$http_host/shiny/ permanent;
+        location /shiny/ {
+            rewrite ^/shiny/(.*)$ /$1 break;
+            proxy_pass http://genodesy.org:3838;
+            proxy_redirect / $scheme://$http_host/shiny/;
+        }
+        
+}
+```
+
+### SSL certificate
+
+I created a free valid SSL certificate on [SSL For Free](https://www.sslforfree.com/).
+
+::: callout-warning
+## Certificate chain file in NGINX
+
+In NGINX, the `ca_bundle.crt` certificate chain file must be appended to the `certificate.crt` file to make it valid and allow the verification of the domain by [ZeroSSL](https://zerossl.com/). (tip found [here](https://blog.steven266.de/include-a-certificate-chain-file-in-nginx-6dca9acdcbb6))
+:::
+
+### Firewall
+
+The [Uncomplicated Firewall (UFW)](https://www.linux.com/training-tutorials/introduction-uncomplicated-firewall-ufw/) was used to allow connections only to specific ports supporting protocols of interest: ssh (22), http (80) and https (443).
+
+``` sh
+sudo apt-get install ufw
+sudo ufw enable
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+```
+
+## Creating and managing the website
+
+### Implementation
+
+As an [R](https://www.r-project.org/) user and a big fan of tools developed by the [Posit PBC](https://posit.co/) team, I'm relying on [Quarto](https://quarto.org/) to create and manage the content of this website.
+
+There are many documentation resources regarding the Quarto publishing system, starting by the extensive [official guide](https://quarto.org/docs/guide/). Quarto has a lot of features and I don't intend (to even try) to list all of them here. Instead, here are a few points on which I put particular attention or that I found particularly handy:
+
+-   [Traffic information with Google analytics](https://quarto.org/docs/websites/website-tools.html#google-analytics)
+
+-   [Blogging](https://quarto.org/docs/websites/website-blog.html)
+
+-   [About page](https://quarto.org/docs/websites/website-about.html)
+
+-   [Cookie consent](https://quarto.org/docs/websites/website-tools.html#cookie-consent)
+
+-   The creation of an **RSS feeds** focused on different categories is straightforward as explained in [Quarto documentation](https://quarto.org/docs/websites/website-blog.html#rss-feed)
+
+-   **Post comments** can be easily allowed and managed with [utterances](https://utteranc.es/) as explained in this [Albert Rapp blog post](https://albert-rapp.de/posts/13_quarto_blog_writing_guide/13_quarto_blog_writing_guide.html#interact-with-your-audience) (the visitor need a github account to be allowed to comment)
+
+-   [Management of non-existent web page](https://quarto.org/docs/websites/website-navigation.html#pages-404)
+
+-   [Styling](https://quarto.org/docs/output-formats/html-themes.html) is very easy with themes, but customization can take a lot of time. This [Albert Rapp video and related links](https://www.youtube.com/watch?v=ErRX8plZpQE) can help to start.
+
+### Content organization
+
+Currently, the [GENODESY]{.tm} website is organized in the following four main parts. As this site is pretty new, it will hopefully grow and evolve.
+
+-   **Home**: this part is empty for the moment. My intend is to point to the different contents and resources offered on this site.
+
+-   **Services**: applications, databases or APIs made available on this site.
+
+-   **Author**: who I am and what I've done.
+
+-   **Blog**: standalone topics addressing more or less technical issues or experiences. I moved this blog on my personal website which, I think, is more relevant.
+
+## Other services
+
+One of the advantages of using a reverse proxy such as [NGINX](https://nginx.org/en/) is that we can focus on
+services installation without having to worry too much about how to secure their access. I've shown [above](#sec-nginx) how I configured NGINX to provide an access to a Neo4j API and to Shiny applications through SSL encryption. The paragraphs below explain how the services themselves were installed and can be used.
+
+### BED Neo4j database
+
+[BED](https://patzaw.github.io/BED/) (Biological Entity Dictionary) is an R package to get and explore mapping between identifiers of biological entities (BE). It relies on a [Neo4j](https://neo4j.com/) database in which the relationships between the identifiers from different sources are recorded. I made an instance of the BED Neo4j database available on this server to allow people to easily test the package and its capabilities.
+
+The BED Neo4j database was installed as [docker](https://www.docker.com/) container, using the [`S05-BED-Container.sh` script](https://github.com/patzaw/BED/blob/master/supp/Build/S05-BED-Container.sh).
+
+The access to the 5454 port is denied by the firewall, but NGINX provides a secure access to this resource via this path: `https://genodesy.org/BED/`. Therefore, external users can connect to the BED database in R as follows:
+
+```{r}
+#| include: false
+library(BED)
+```
+
+```{r}
+library(BED)
+connectToBed(url="https://genodesy.org/BED/")
+```
+### Shiny server
+
+[Shiny](https://shiny.rstudio.com/) is an R package to build interactive web apps straight from R. These apps can be easily deployed on services such as [shinyapps.io](https://www.shinyapps.io/). It is also possible to host them within a Shiny Server instance. 
+
+The Shiny Server was simply installed following the instructions provided in the [official administrator's guide](https://docs.rstudio.com/shiny-server/).
+
+Again, the access to the 5454 port is denied by the firewall, but NGINX provides a secure access to this resource via this path: `https://genodesy.org/shiny/`. Here is an example of a Shiny app hosted on *genodesy.org* : [https://genodesy.org/shiny/ReDaMoR](https://genodesy.org/shiny/ReDaMoR).
+
+## License
+
+I chose to release the content of this website under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.

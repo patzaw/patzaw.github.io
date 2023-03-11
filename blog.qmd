@@ -1,0 +1,13 @@
+---
+title: "Blog posts"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: numbered
+  fields: [date, title, reading-time, description, image, categories]
+  filter-ui: true
+  sort-ui: true
+  feed: true
+page-layout: full
+---

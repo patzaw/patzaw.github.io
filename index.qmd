@@ -1,0 +1,42 @@
+---
+title: "Patrice Godard"
+subtitle: "Data scientist & Bioinformatician"
+about:
+  template: trestles
+  image: images/profile-s.jpg
+  links:
+    - icon: github
+      text: Github
+      href: https://github.com/patzaw
+    - icon: tools
+      text: Tools
+      href: tools.qmd
+    - icon: mortarboard-fill
+      text: Publications
+      href: https://scholar.google.be/citations?user=jN9LJG0AAAAJ&hl=en
+    - icon: twitter
+      text: twitter
+      href: https://twitter.com/PatriceGodard
+    - icon: linkedin
+      text: linkedin
+      href: https://www.linkedin.com/in/patrice-godard-65a25920/
+    - icon: envelope-fill
+      text: email
+      href: mailto:patrice.godard@genodesy.org
+---
+
+Hello! I'm a data scientist and bioinformatician at [UCB](https://ucb.com), a multinational biopharmaceutical company. I have strong experience in multiomics data analysis applied to therapeutic research. I mainly rely on the [R programming language](https://www.r-project.org/) for which I have developed several libraries.
+
+::: columns
+::: {.column style="width:47%; padding-right:2px;"}
+![](images/Montpellier-Sainte-Anne-bw-s.jpg)
+:::
+
+::: {.column style="width:53%; padding-left:2px;"}
+![](images/Charleroi-ville-belgique-tour-bleue-paysafe-bw-s.jpg)
+:::
+:::
+
+<!-- {height="150"} {height="150"} -->
+
+Coming from [Montpellier](https://www.google.com/maps/place/Montpellier), where I studied biochemistry, I've lived in Belgium for more than 20 years, in the [*pays de Charleroi*](https://www.google.com/maps/place/Pays+Noir). After my [PhD](https://difusion.ulb.ac.be/vufind/Record/ULB-DIPOT:oai:dipot.ulb.ac.be:2013/210856/TOC) at the [ULB (Université Libre de Bruxelles)](https://www.ulb.be/), during which I studied computer science, data science and bioinformatics, and a postdoc at the [University of Namur](https://www.unamur.be/), I moved to the biotech industry focusing on pharmaceutical and medical applications.

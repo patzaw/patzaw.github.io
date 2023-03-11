@@ -1,4 +1,3 @@
-patzaw.github.io
-================
+# Personal website
 
-github pages
+Generated using [quarto](https://quarto.org/)
