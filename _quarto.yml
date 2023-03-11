@@ -36,5 +36,5 @@ website:
 format:
   html:
     theme: spacelab
-    css: styles.scss
+    css: styles.css
     toc: true
