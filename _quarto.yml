@@ -1,5 +1,6 @@
 project:
   type: website
+  resources: Unvoll.ttf
 
 website:
   title: "Patrice Godard"
