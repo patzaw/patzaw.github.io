@@ -1,0 +1,16 @@
+// Font familly for GENODESY
+@font-face {
+  font-family: Unvoll;
+  src: url(Unvoll.ttf);
+}
+.tm {
+  font-family:Unvoll;
+}
+
+// Cookie preferences style
+#open_preferences_center {
+   text-decoration: underline;
+}
+#open_preferences_center:hover {
+  cursor:pointer;
+}
