@@ -21,7 +21,7 @@ website:
       - href: index.qmd
         text: About
     right: 
-      - href: genodesy.html
+      - href: https://genodesy.org
         text: GENODESY
       - href: tools.qmd
         text: Tools
