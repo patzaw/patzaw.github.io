@@ -14,9 +14,6 @@ about:
     - icon: mortarboard-fill
       text: Publications
       href: https://scholar.google.be/citations?user=jN9LJG0AAAAJ&hl=en
-    - icon: twitter
-      text: twitter
-      href: https://twitter.com/PatriceGodard
     - icon: linkedin
       text: linkedin
       href: https://www.linkedin.com/in/patrice-godard-65a25920/
