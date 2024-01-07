@@ -67,7 +67,7 @@
     "href": "tools.html#visualization",
     "title": "Tools",
     "section": "Visualization",
-    "text": "Visualization\n\nBuild SVG Custom User Interface\n\n\n\n\n\n\n\n\nThe aim of the ‘bscui’ R package is to render any SVG image as an interactive figure and convert identified elements into an actionable interface. This figure can be seamlessly integrated into R Markdown and Quarto documents, as well as Shiny applications, allowing manipulation of elements and reporting actions performed on them.\n\nPackage website"
+    "text": "Visualization\n\nBuild SVG Custom User Interface\n\n\n\n\n\n\n\n\nThe aim of the bscui R package is to render any SVG image as an interactive figure and convert identified elements into an actionable interface. This figure can be seamlessly integrated into R Markdown and Quarto documents, as well as Shiny applications, allowing manipulation of elements and reporting actions performed on them.\n\nPackage website"
   },
   {
     "objectID": "tools.html#data-knowledge-management",
