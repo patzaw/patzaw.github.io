@@ -63,6 +63,13 @@
     "text": "Here is a list of R libraries I developed to support data manipulation and analyses."
   },
   {
+    "objectID": "tools.html#visualization",
+    "href": "tools.html#visualization",
+    "title": "Tools",
+    "section": "Visualization",
+    "text": "Visualization\n\nBuild SVG Custom User Interface {#bscui}::: columns\n\n\n\n\n\n\n\n\nThe aim of the ‘bscui’ R package is to render any SVG image as an interactive figure and convert identified elements into an actionable interface. This figure can be seamlessly integrated into R Markdown and Quarto documents, as well as Shiny applications, allowing manipulation of elements and reporting actions performed on them.\n\nPackage website"
+  },
+  {
     "objectID": "tools.html#data-knowledge-management",
     "href": "tools.html#data-knowledge-management",
     "title": "Tools",
