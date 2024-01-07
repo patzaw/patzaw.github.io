@@ -30,7 +30,7 @@ website:
       - icon: rss
         href: blog.xml
   page-footer: 
-    left: "© 2023 Patrice Godard<br>Made with [Quarto](https://quarto.org/)"
+    left: "© 2024 Patrice Godard<br>Made with [Quarto](https://quarto.org/)"
     right: '[License](/license.qmd)<br>[Cookie Preferences]{#open_preferences_center}'
 
 format:

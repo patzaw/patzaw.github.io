@@ -5,6 +5,24 @@ title: "Tools"
 Here is a list of [R](https://www.r-project.org/) libraries I developed to support data manipulation and analyses.
 
 <!----------------------------------------------------------------------------->
+## Visualization
+
+### Build SVG Custom User Interface {#bscui}
+
+::: columns
+::: {.column style="width:15%; padding-right:3px; padding-top:10px;"}
+[![](images/bscui-medium.png)](https://patzaw.github.io/bscui/)
+:::
+
+::: {.column style="width:85%; padding-left:10px;"}
+
+The aim of the bscui R package is to render any SVG image as an interactive figure and convert identified elements into an actionable interface. This figure can be seamlessly integrated into [R Markdown](https://rmarkdown.rstudio.com/) and [Quarto](https://quarto.org/) documents, as well as [Shiny](https://shiny.posit.co/) applications, allowing manipulation of elements and reporting actions performed on them.
+
+ - [Package website](https://patzaw.github.io/bscui/)
+:::
+:::
+
+<!----------------------------------------------------------------------------->
 ## Data knowledge management
 
 ### Modeling data with ReDaMoR {#redamor}
