@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/bscui-presentation.html",
       "/posts/creating-website.html"
     ]
   }

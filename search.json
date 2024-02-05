@@ -42,6 +42,34 @@
     "text": "5 License\nI chose to release the content of this website under a Creative Commons Attribution-ShareAlike 4.0 International License."
   },
   {
+    "objectID": "posts/bscui-presentation.html",
+    "href": "posts/bscui-presentation.html",
+    "title": "Create interactive figures from SVG images with {bscui}",
+    "section": "",
+    "text": "The {bscui} R package, made recently available on CRAN, has been written to transform SVG images into interactive figures. It can be used to display data on a drawing in a report or to interact with the drawing in a R {shiny} application. The example below is very basic and is made to give a general idea of the package principles. A more complete introduction is available in the package vignette.\nLet’s load the package and start the demo."
+  },
+  {
+    "objectID": "posts/bscui-presentation.html#importing-an-svg-image",
+    "href": "posts/bscui-presentation.html#importing-an-svg-image",
+    "title": "Create interactive figures from SVG images with {bscui}",
+    "section": "1 Importing an SVG image",
+    "text": "1 Importing an SVG image\nIn this example, we use an SVG representation of the heliocentric system taken from the W3C: https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg This SVG file can be read with the {xml2} package:\n\nsvg <- xml2::read_xml(\n   \"https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg\"\n)\n\nThe imported SVG can be directly displayed with the bscui() function.\n\nbscui(svg)\n\n\n\n\n\n\nThe figure can be grabbed with mouse and enlarged or shrunk using the mouse wheel. Clicking on the button at the top-left corner of the figure displays a menu with various functions, including resetting the view and exporting the figure in SVG or PNG format. Several configuration choices are made by default but can be changed with the set_bscui_options() function, such as the zoom range or the width of the menu."
+  },
+  {
+    "objectID": "posts/bscui-presentation.html#make-svg-elements-interactive",
+    "href": "posts/bscui-presentation.html#make-svg-elements-interactive",
+    "title": "Create interactive figures from SVG images with {bscui}",
+    "section": "2 Make SVG elements interactive",
+    "text": "2 Make SVG elements interactive\nWe can interact with the figure above (grab, zoom…) but not with its elements. For example, we would like to be able to interact with the sun and the planets turning around it.\nTo make it possible, we need the SVG elements to be identifiable with an ‘id’ attribute. Unfortunately, it is not the case in the SVG file we took. Thus, let’s add first this attribute with {xml2}.\n\nxml2::xml_ns_strip(svg)\ncircles <- xml2::xml_find_all(svg, \"//circle\")\nfor(i in 1:length(circles)){\n   circle <- circles[[i]]\n   color <- xml2::xml_attr(circle, \"fill\")\n   if(color == \"#FD0\"){\n      id <- \"Sun\"\n   }\n   if(color == \"#F00\"){\n      id <- \"Mercury\"\n   }\n   if(color == \"#0F0\"){\n      id <- \"Venus\"\n   }\n   if(color == \"#00F\"){\n      id <- \"Earth\"\n   }\n   if(color == \"#C0C\"){\n      id <- \"Mars\"\n   }\n   xml2::xml_attr(circle, \"id\") <- id\n}\n\nThe elements can then be made interactive with the set_bscui_ui_elements() function which takes as second argument a data frame with the following columns:\n\nid: the element identifier\nui_type: either “selectable” (several elements can be selected), “button” (action will be triggered by clicking), “none” (no action on click)\ntitle: a description of the element to display when the mouse hovers over the element\n\n\nui_elements <- data.frame(\n   id = c(\"Sun\", \"Mercury\", \"Venus\", \"Earth\", \"Mars\"),\n   ui_type = c(\"button\", rep(\"selectable\", 4))\n)\nwp_links <- c(\n   \"Sun\"=\"https://en.wikipedia.org/wiki/Sun\", \n   \"Mercury\"=\"https://en.wikipedia.org/wiki/Mercury_(planet)\", \n   \"Venus\"=\"https://en.wikipedia.org/wiki/Venus\", \n   \"Earth\"=\"https://en.wikipedia.org/wiki/Earth\", \n   \"Mars\"=\"https://en.wikipedia.org/wiki/Mars\"\n)\nui_elements$title <- sprintf(\n   paste(\n      '<div style=\"padding:5px;',\n      'border:black 1px solid; background:#FFFFF0AA;\">',\n      '<strong><a href=\"%s\" target=\"_blank\">%s</a></strong>',\n      '</div>'\n   ),\n   wp_links[ui_elements$id], ui_elements$id\n)\nbscui(svg) |> \n   set_bscui_ui_elements(ui_elements)\n\n\n\n\n\n\nThe identified elements can be further customized with the set_bscui_styles() and the set_bscui_attributes() functions."
+  },
+  {
+    "objectID": "posts/bscui-presentation.html#shiny",
+    "href": "posts/bscui-presentation.html#shiny",
+    "title": "Create interactive figures from SVG images with {bscui}",
+    "section": "3 Shiny",
+    "text": "3 Shiny\nThe identified elements can be further leveraged in a shiny application. The code chunk below show a very simple example of such an application with the heliocentric SVG image used so far.\n\nlibrary(shiny)\nui <- fluidPage(\n   fluidRow(\n      column(6, bscuiOutput(\"heliocentric\")),\n      column(\n         6,\n         tags$ul(\n            tags$li(\"Hovered:\", textOutput(\"hovered\", inline=TRUE)),\n            tags$li(\"Operated button:\", textOutput(\"operated\", inline=TRUE)),\n            tags$li(\"Selected:\", textOutput(\"selected\", inline=TRUE))\n         )\n      )\n   )\n)\nserver <- function(input, output, session){\n   output$heliocentric <- renderBscui({\n      bscui(svg)|>\n         set_bscui_ui_elements(ui_elements)\n   })\n   output$hovered <- renderText({\n      input$heliocentric_hovered\n   })\n   output$operated <- renderText({\n      print(input$heliocentric_operated)\n      sprintf(\n         \"%s (%s click)\",\n         input$heliocentric_operated$id,\n         input$heliocentric_operated$click\n      )\n   })\n   output$selected <- renderText({\n      input$heliocentric_selected\n   })\n}\nrunApp(shinyApp(ui, server))\n\nThe bscuiOutput() and renderBscui() functions are used to instantiate the widget and the following information is exposed to Shiny:\n\ninput$bscuiID_hovered reports selected elements\ninput$bscuiID_hovered reports operated button elements\ninput$bscuiID_hovered reports hovered elements\n\nbscuiID is used to refer to the figure output id, “heliocentric” in the example above.\n\n3.1 Figure modification\nThe figure can also be modified based on Shiny events by creating a “bscui_Proxy” object. It’s done by calling the bscuiProxy() within the sever function. Functions like order_bscui_elements(), add_bscui_element() and remove_bscui_elements() are used to modify the SVG structure. The update_bscui_ui_elements(), update_bscui_attributes() and update_bscui_styles() functions are used to update identified elements. Finally the update_bscui_selection() and click_bscui_element() functions are used to trigger specific elements.\nAll the functions above are further described and exemplified in the package vignette. And an advanced Shiny application is provided within the package:\n\nshiny::runApp(system.file(\"examples\", \"shiny-anatomogram\", package = \"bscui\"))"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Patrice Godard",
@@ -102,6 +130,6 @@
     "href": "blog.html",
     "title": "Blog posts",
     "section": "",
-    "text": "Order By\n       Default\n         \n          Title\n        \n         \n          Date - Oldest\n        \n         \n          Date - Newest\n        \n     \n  \n    \n      \n      \n    \n\n\n\n\n  \n\n\n\n\nSetting-up GENODESY\n\n\n\n\n\n\n\ninfrastructure\n\n\n\n\nSharing experience regarding the creation of the GENODESY website and related web services\n\n\n\n\n\n\nNov 2, 2022\n\n\n7 min\n\n\n\n\n\n\nNo matching items"
+    "text": "Order By\n       Default\n         \n          Title\n        \n         \n          Date - Oldest\n        \n         \n          Date - Newest\n        \n     \n  \n    \n      \n      \n    \n\n\n\n\n  \n\n\n\n\nCreate interactive figures from SVG images with {bscui}\n\n\n\n\n\n\n\nR\n\n\nVisualization\n\n\n\n\nPresentation of the {bscui} R package\n\n\n\n\n\n\nFeb 5, 2024\n\n\n4 min\n\n\n\n\n\n\n  \n\n\n\n\nSetting-up GENODESY\n\n\n\n\n\n\n\ninfrastructure\n\n\n\n\nSharing experience regarding the creation of the GENODESY website and related web services\n\n\n\n\n\n\nNov 2, 2022\n\n\n7 min\n\n\n\n\n\n\nNo matching items"
   }
 ]
