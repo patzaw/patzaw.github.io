@@ -8,6 +8,7 @@ listing:
   fields: [date, title, reading-time, description, image, categories]
   filter-ui: true
   sort-ui: true
-  feed: true
+  feed:
+    categories: [R]
 page-layout: full
 ---
