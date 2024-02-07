@@ -126,6 +126,13 @@
     "text": "Backend libraries\n\nneo2R\nThe aim of the neo2R is to provide simple and low level connectors for querying Neo4j graph databases from R. The objects returned by the query functions are either lists or data.frames with very few post-processing. It allows fast processing of queries returning many records. And it let the user handle post-processing according to the data model and his needs.\n\nPackage website\n\n\n\nClickHouseHTTP\nClickHouse is an open-source, high performance columnar OLAP (online analytical processing of queries) database management system for real-time analytics using SQL. This R DBI backend relies on the ClickHouse HTTP interface and support the HTTPS protocol.\n\nPackage website"
   },
   {
+    "objectID": "blogroll.html",
+    "href": "blogroll.html",
+    "title": "Blogroll",
+    "section": "",
+    "text": "https://www.r-bloggers.com/"
+  },
+  {
     "objectID": "blog.html",
     "href": "blog.html",
     "title": "Blog posts",
