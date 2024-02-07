@@ -27,6 +27,10 @@ website:
         text: Tools
       - href: blog.qmd
         text: Blog
+      - text: More
+        menu:
+          - href: blogroll.qmd
+            text: Blogroll
       - icon: rss
         href: blog.xml
   page-footer: 
