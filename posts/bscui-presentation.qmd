@@ -36,7 +36,7 @@ library(bscui)
 
 In this example, we use an SVG representation of the heliocentric system
 taken from
-the W3C: https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg
+the W3C: [https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg](https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg).
 This SVG file can be read with the {[xml2](https://xml2.r-lib.org/)} package:
 
 ```{r}
