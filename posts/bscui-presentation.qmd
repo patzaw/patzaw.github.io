@@ -13,8 +13,8 @@ editor_options:
 ![](images/bscui.png){width="200px" fig-alt="bscui logo"}
 
 <script src="https://patzaw.github.io/site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
-<script src="https://patzaw.github.io/site_libs/bscui-0.0.1/bscui.min.js"></script>
-<script src="https://patzaw.github.io/site_libs/bscui-binding-0.1.3/bscui.js"></script>
+<script src="https://patzaw.github.io/site_libs/bscui-0.0.3/bscui.min.js"></script>
+<script src="https://patzaw.github.io/site_libs/bscui-binding-0.1.5/bscui.js"></script>
 
 The {[bscui](https://patzaw.github.io/bscui)} R package,
 made recently available on [CRAN](https://cran.r-project.org/package=bscui),
@@ -48,6 +48,7 @@ svg <- xml2::read_xml(
 The imported SVG can be directly displayed with the `bscui()` function.
 
 ```{r}
+packageVersion("bscui")
 bscui(svg)
 ```
 
