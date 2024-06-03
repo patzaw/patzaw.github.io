@@ -1,0 +1,142 @@
+[
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "Blog posts",
+    "section": "",
+    "text": "Order By\n       Default\n         \n          Title\n        \n         \n          Date - Oldest\n        \n         \n          Date - Newest\n        \n     \n  \n    \n      \n      \n    \n\n\n\n\n\n\n\n\n\n\nCreate interactive figures from SVG images with {bscui}\n\n\n\n\n\n\nR\n\n\nVisualization\n\n\n\nPresentation of the {bscui} R package\n\n\n\n\n\nFeb 5, 2024\n\n\n5 min\n\n\n\n\n\n\n\n\n\n\n\n\nSetting-up GENODESY\n\n\n\n\n\n\ninfrastructure\n\n\n\nSharing experience regarding the creation of the GENODESY website and related web services\n\n\n\n\n\nNov 2, 2022\n\n\n8 min\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "tools.html",
+    "href": "tools.html",
+    "title": "Tools",
+    "section": "",
+    "text": "Here is a list of R libraries I developed to support data manipulation and analyses."
+  },
+  {
+    "objectID": "tools.html#visualization",
+    "href": "tools.html#visualization",
+    "title": "Tools",
+    "section": "Visualization",
+    "text": "Visualization\n\nBuild SVG Custom User Interface\n\n\n\n\nThe aim of the bscui R package is to render any SVG image as an interactive figure and convert identified elements into an actionable interface. This figure can be seamlessly integrated into R Markdown and Quarto documents, as well as Shiny applications, allowing manipulation of elements and reporting actions performed on them.\n\nPackage website"
+  },
+  {
+    "objectID": "tools.html#data-knowledge-management",
+    "href": "tools.html#data-knowledge-management",
+    "title": "Tools",
+    "section": "Data knowledge management",
+    "text": "Data knowledge management\n\nModeling data with ReDaMoR\n\n\n\n\nThe ReDaMoR (Relational Data ModeleR) package allows the manipulation of relational data models in R. It provides functions to create, import and save relational data models. These functions are also accessible through a graphical user interface made with Shiny.\n\nPackage website\nInstance of the Shiny app running at GENODESY\n\n\n\n\n\nManaging data with TKCat\n\n\n\n\nThe aim of TKCat (Tailored Knowledge Catalog) is to facilitate the management of data from knowledge resources that are frequently used alone or together in research environments. In TKCat, knowledge resources are manipulated as modeled database (MDB) objects. These objects provide access to the data tables along with a general description of the resource and a detail data model generated with ReDaMoR documenting the tables, their fields and their relationships. These MDB are then gathered in catalogs that can be easily explored an shared. TKCat provides tools to easily subset, filter and combine MDBs and create new catalogs suited for specific needs.\n\nPackage website\nPresentation at the useR!2022 conference"
+  },
+  {
+    "objectID": "tools.html#concept-dictionaries",
+    "href": "tools.html#concept-dictionaries",
+    "title": "Tools",
+    "section": "Concept dictionaries",
+    "text": "Concept dictionaries\n\nBiological Entity Dictionary (BED)\n\n\n\n\nThe aim of the BED (Biological Entity Dictionary) R package is to get and explore mapping between identifiers of biological entities (BE). This package provides a way to connect to a BED Neo4j database in which the relationships between the identifiers from different sources are recorded.\n\nPackage website\nPublication\nDocker image of the database\nAn instance of the BED database is running at GENODESY\n\n\n\n\n\nDictionary Of Disease Ontologies (DODO)\nThe aim of DODO (Dictionary Of Disease Ontologies) is to allow an easier way to interact and explore disease ontologies and their identifiers. The database is build on Neo4j and incorporates different ontologies with an accompagnying R package that allows easy access, exploration, and definition of disease concepts of interest. It can work as the intermediate player to facilitate access and exhaustive extraction of information from other life science databases without the need to harmonize these up front.\n\nCo-author: Liesbeth François\nPackage website\nPublication\nDocker image of the database"
+  },
+  {
+    "objectID": "tools.html#bioinformatics",
+    "href": "tools.html#bioinformatics",
+    "title": "Tools",
+    "section": "Bioinformatics",
+    "text": "Bioinformatics\n\nPhenotype Consensus Analysis (PCAN)\nPhenotype Consensus Analysis (PCAN) is an indirect phenotype-based method that quantifies the consensus similarity of genetic disorders linked to the mechanism of a putative disease causing gene. PCAN makes use of widely adopted knowledge resources for protein-protein interactions (e.g. STRING) and signaling pathways (e.g. Reactome) and the comprehensive HPO (Human Phenotype Ontology) annotation resource. This approach allows support for the discovery of novel disease genes and naturally lends itself to the mechanistic deconvolution of diverse phenotypes.\n\nCo-author: Matthew Page\nPackage website\nPublication"
+  },
+  {
+    "objectID": "tools.html#backend-libraries",
+    "href": "tools.html#backend-libraries",
+    "title": "Tools",
+    "section": "Backend libraries",
+    "text": "Backend libraries\n\nneo2R\nThe aim of the neo2R is to provide simple and low level connectors for querying Neo4j graph databases from R. The objects returned by the query functions are either lists or data.frames with very few post-processing. It allows fast processing of queries returning many records. And it let the user handle post-processing according to the data model and his needs.\n\nPackage website\n\n\n\nClickHouseHTTP\nClickHouse is an open-source, high performance columnar OLAP (online analytical processing of queries) database management system for real-time analytics using SQL. This R DBI backend relies on the ClickHouse HTTP interface and support the HTTPS protocol.\n\nPackage website"
+  },
+  {
+    "objectID": "license.html",
+    "href": "license.html",
+    "title": "License",
+    "section": "",
+    "text": "The content of this website is released under a Creative Commons Attribution-ShareAlike 4.0 International License."
+  },
+  {
+    "objectID": "posts/bscui-presentation.html",
+    "href": "posts/bscui-presentation.html",
+    "title": "Create interactive figures from SVG images with {bscui}",
+    "section": "",
+    "text": "The {bscui} R package, made recently available on CRAN, has been written to transform SVG images into interactive figures. It can be used to display data on a drawing in a report or to interact with the drawing in a R {shiny} application. The example below is very basic and is made to give a general idea of the package principles. A more complete introduction is available in the package vignette.\nLet’s load the package and start the demo.\nlibrary(bscui)"
+  },
+  {
+    "objectID": "posts/bscui-presentation.html#importing-an-svg-image",
+    "href": "posts/bscui-presentation.html#importing-an-svg-image",
+    "title": "Create interactive figures from SVG images with {bscui}",
+    "section": "1 Importing an SVG image",
+    "text": "1 Importing an SVG image\nIn this example, we use an SVG representation of the heliocentric system taken from the W3C: https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg. This SVG file can be read with the {xml2} package:\n\nsvg &lt;- xml2::read_xml(\n   \"https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg\"\n)\n\nThe imported SVG can be directly displayed with the bscui() function.\n\npackageVersion(\"bscui\")\n\n[1] '0.1.5'\n\nbscui(svg)\n\n\n\n\n\nThe figure can be grabbed with mouse and enlarged or shrunk using the mouse wheel. Clicking on the button at the top-left corner of the figure displays a menu with various functions, including resetting the view and exporting the figure in SVG or PNG format. Several configuration choices are made by default but can be changed with the set_bscui_options() function, such as the zoom range or the width of the menu."
+  },
+  {
+    "objectID": "posts/bscui-presentation.html#make-svg-elements-interactive",
+    "href": "posts/bscui-presentation.html#make-svg-elements-interactive",
+    "title": "Create interactive figures from SVG images with {bscui}",
+    "section": "2 Make SVG elements interactive",
+    "text": "2 Make SVG elements interactive\nWe can interact with the figure above (grab, zoom…) but not with its elements. For example, we would like to be able to interact with the sun and the planets turning around it.\nTo make it possible, we need the SVG elements to be identifiable with an ‘id’ attribute. Unfortunately, it is not the case in the SVG file we took. Thus, let’s add first this attribute with {xml2}.\n\nxml2::xml_ns_strip(svg)\ncircles &lt;- xml2::xml_find_all(svg, \"//circle\")\nfor(i in 1:length(circles)){\n   circle &lt;- circles[[i]]\n   color &lt;- xml2::xml_attr(circle, \"fill\")\n   if(color == \"#FD0\"){\n      id &lt;- \"Sun\"\n   }\n   if(color == \"#F00\"){\n      id &lt;- \"Mercury\"\n   }\n   if(color == \"#0F0\"){\n      id &lt;- \"Venus\"\n   }\n   if(color == \"#00F\"){\n      id &lt;- \"Earth\"\n   }\n   if(color == \"#C0C\"){\n      id &lt;- \"Mars\"\n   }\n   xml2::xml_attr(circle, \"id\") &lt;- id\n}\n\nThe elements can then be made interactive with the set_bscui_ui_elements() function which takes as second argument a data frame with the following columns:\n\nid: the element identifier\nui_type: either “selectable” (several elements can be selected), “button” (action will be triggered by clicking), “none” (no action on click)\ntitle: a description of the element to display when the mouse hovers over the element\n\n\nui_elements &lt;- data.frame(\n   id = c(\"Sun\", \"Mercury\", \"Venus\", \"Earth\", \"Mars\"),\n   ui_type = c(\"button\", rep(\"selectable\", 4))\n)\nwp_links &lt;- c(\n   \"Sun\"=\"https://en.wikipedia.org/wiki/Sun\", \n   \"Mercury\"=\"https://en.wikipedia.org/wiki/Mercury_(planet)\", \n   \"Venus\"=\"https://en.wikipedia.org/wiki/Venus\", \n   \"Earth\"=\"https://en.wikipedia.org/wiki/Earth\", \n   \"Mars\"=\"https://en.wikipedia.org/wiki/Mars\"\n)\nui_elements$title &lt;- sprintf(\n   paste(\n      '&lt;div style=\"padding:5px;',\n      'border:black 1px solid; background:#FFFFF0AA;\"&gt;',\n      '&lt;strong&gt;&lt;a href=\"%s\" target=\"_blank\"&gt;%s&lt;/a&gt;&lt;/strong&gt;',\n      '&lt;/div&gt;'\n   ),\n   wp_links[ui_elements$id], ui_elements$id\n)\nbscui(svg) |&gt; \n   set_bscui_ui_elements(ui_elements)\n\n\n\n\n\nThe identified elements can be further customized with the set_bscui_styles() and the set_bscui_attributes() functions."
+  },
+  {
+    "objectID": "posts/bscui-presentation.html#shiny",
+    "href": "posts/bscui-presentation.html#shiny",
+    "title": "Create interactive figures from SVG images with {bscui}",
+    "section": "3 Shiny",
+    "text": "3 Shiny\nThe identified elements can be further leveraged in a shiny application. The code chunk below show a very simple example of such an application with the heliocentric SVG image used so far.\n\nlibrary(shiny)\nui &lt;- fluidPage(\n   fluidRow(\n      column(6, bscuiOutput(\"heliocentric\")),\n      column(\n         6,\n         tags$ul(\n            tags$li(\"Hovered:\", textOutput(\"hovered\", inline=TRUE)),\n            tags$li(\"Operated button:\", textOutput(\"operated\", inline=TRUE)),\n            tags$li(\"Selected:\", textOutput(\"selected\", inline=TRUE))\n         )\n      )\n   )\n)\nserver &lt;- function(input, output, session){\n   output$heliocentric &lt;- renderBscui({\n      bscui(svg)|&gt;\n         set_bscui_ui_elements(ui_elements)\n   })\n   output$hovered &lt;- renderText({\n      input$heliocentric_hovered\n   })\n   output$operated &lt;- renderText({\n      print(input$heliocentric_operated)\n      sprintf(\n         \"%s (%s click)\",\n         input$heliocentric_operated$id,\n         input$heliocentric_operated$click\n      )\n   })\n   output$selected &lt;- renderText({\n      input$heliocentric_selected\n   })\n}\nrunApp(shinyApp(ui, server))\n\nThe bscuiOutput() and renderBscui() functions are used to instantiate the widget and the following information is exposed to Shiny:\n\ninput$bscuiID_hovered reports selected elements\ninput$bscuiID_hovered reports operated button elements\ninput$bscuiID_hovered reports hovered elements\n\nbscuiID is used to refer to the figure output id, “heliocentric” in the example above.\n\n3.1 Figure modification\nThe figure can also be modified based on Shiny events by creating a “bscui_Proxy” object. It’s done by calling the bscuiProxy() within the sever function. Functions like order_bscui_elements(), add_bscui_element() and remove_bscui_elements() are used to modify the SVG structure. The update_bscui_ui_elements(), update_bscui_attributes() and update_bscui_styles() functions are used to update identified elements. Finally the update_bscui_selection() and click_bscui_element() functions are used to trigger specific elements.\nAll the functions above are further described and exemplified in the package vignette. And an advanced Shiny application is provided within the package:\n\nshiny::runApp(system.file(\"examples\", \"shiny-anatomogram\", package = \"bscui\"))"
+  },
+  {
+    "objectID": "posts/creating-website.html",
+    "href": "posts/creating-website.html",
+    "title": "Setting-up GENODESY",
+    "section": "",
+    "text": "After having bought the domain name a few years ago, I’ve finally decided to setup the GENODESY website and related resources. Here, I share my experience regarding this process: the tools and services I relied on and the design and technical choices I made.\nMy intend was to setup, not only a website and a blog, but also some services such as Shiny applications, Neo4j and ClickHouse databases. That’s why I chose to rent a dedicated server that I configured and that I’m administrating myself. I spent time in tuning the configuration of the different services in order to make them as accessible as possible to the users:"
+  },
+  {
+    "objectID": "posts/creating-website.html#hosting-the-services",
+    "href": "posts/creating-website.html#hosting-the-services",
+    "title": "Setting-up GENODESY",
+    "section": "1 Hosting the services",
+    "text": "1 Hosting the services\nThere are many companies providing capabilities for hosting web pages and web services. Here, I chose OVHCloud, a french cloud computing company. I went for the first option in the kimsufi range of dedicated servers:\n\nCPU: Intel Xeon E3-1245v2 - 4c/8t - 3.4 GHz/3.8 GHz\nMemory: 32 GB DDR3\nStorage: 3 x 2 TB HDD SATA Soft RAID\nOS: Ubuntu Server 22.04 LTS “Jammy Jellyfish”\n\nI also bought the genodesy domain names (.org, .com, .net, .info and .biz) to OVHCloud and it was easy to map genodesy.org to the server IP address in the DNS (Domain Name System) using their configuration tool."
+  },
+  {
+    "objectID": "posts/creating-website.html#web-server-and-reverse-proxy",
+    "href": "posts/creating-website.html#web-server-and-reverse-proxy",
+    "title": "Setting-up GENODESY",
+    "section": "2 Web server and reverse proxy",
+    "text": "2 Web server and reverse proxy\n\n2.1 NGINX configuration\nI chose the NGINX web server to make the website available. NGINX can also be used as a reverse proxy, and I took advantage of this feature to provide other services.\nI followed the following tutorials to get familiar with NGINX configuration:\n\nInstall NGINX in Ubuntu (digital ocean)\nSelf-signed SSL certificates for NGINX (digital ocean)\nReverse proxy configuration:\n\nHow to forward an http request to another port?\nRunning a Shiny server with a proxy\n\n\nI configured the genodesy.org server block to setup the following behaviors:\n\nredirect http (80) queries to the https (443) port\nprovide services through the https (443) port using a valid SSL (Secure Sockets Layer) certificate\nproxy pass queries to specific path to services using different ports (e.g. shiny or neo4j)\n\nHere is the server block configuration file I’ve finally written:\n\n\n/etc/nginx/sites-available/genodesy.org\n\n\n# Queries to the http (80) port are redirected to the https (443) port\nserver {\n    listen 80 default_server;\n    listen [::]:80 default_server;\n    server_name genodesy.org www.genodesy.org;\n    \n    location / {\n        return 301 https://$server_name$request_uri;\n    }\n    \n    root /var/www/genodesy.org/html;\n    index index.html;\n    \n    # The following folder is used to verify the domain of issued SSL\n    # certificate and therefore is still accessible through the http (80) port.\n    location /.well-known/pki-validation/ {\n        try_files $uri $uri/ =404;\n    }\n}\n\n# Services are provided through the https (443) port\nserver {\n        listen 443 ssl http2 default_server;\n        listen [::]:443 ssl http2 default_server;\n        \n        # The files included below are used for SSL configuration\n        include snippets/ssl-for-free.conf;\n        include snippets/ssl-params.conf;\n\n\n        root /var/www/genodesy.org/html;\n        index index.html index.htm index.nginx-debian.html;\n        \n        error_page 404 /404.html;\n\n        server_name genodesy.org www.genodesy.org;\n\n        # The main web server\n        location / {\n                try_files $uri $uri/ =404;\n        }\n        \n        # Reverse proxy to the BED Neo4j database hosted on port 5454\n        location /BED {\n            rewrite ^/BED/?(.*)$ /$1 break;\n            proxy_pass http://genodesy.org:5454/browser;\n            proxy_redirect / $scheme://$http_host/BED;\n        }\n        \n        # Reverse proxy to Shiny hosted on port 3838\n        rewrite ^/shiny$ $scheme://$http_host/shiny/ permanent;\n        location /shiny/ {\n            rewrite ^/shiny/(.*)$ /$1 break;\n            proxy_pass http://genodesy.org:3838;\n            proxy_redirect / $scheme://$http_host/shiny/;\n        }\n        \n}\n\n\n\n2.2 SSL certificate\nI created a free valid SSL certificate on SSL For Free.\n\n\n\n\n\n\nCertificate chain file in NGINX\n\n\n\nIn NGINX, the ca_bundle.crt certificate chain file must be appended to the certificate.crt file to make it valid and allow the verification of the domain by ZeroSSL. (tip found here)\n\n\n\n\n2.3 Firewall\nThe Uncomplicated Firewall (UFW) was used to allow connections only to specific ports supporting protocols of interest: ssh (22), http (80) and https (443).\nsudo apt-get install ufw\nsudo ufw enable\nsudo ufw allow 22/tcp\nsudo ufw allow 80/tcp\nsudo ufw allow 443/tcp"
+  },
+  {
+    "objectID": "posts/creating-website.html#creating-and-managing-the-website",
+    "href": "posts/creating-website.html#creating-and-managing-the-website",
+    "title": "Setting-up GENODESY",
+    "section": "3 Creating and managing the website",
+    "text": "3 Creating and managing the website\n\n3.1 Implementation\nAs an R user and a big fan of tools developed by the Posit PBC team, I’m relying on Quarto to create and manage the content of this website.\nThere are many documentation resources regarding the Quarto publishing system, starting by the extensive official guide. Quarto has a lot of features and I don’t intend (to even try) to list all of them here. Instead, here are a few points on which I put particular attention or that I found particularly handy:\n\nTraffic information with Google analytics\nBlogging\nAbout page\nCookie consent\nThe creation of an RSS feeds focused on different categories is straightforward as explained in Quarto documentation\nPost comments can be easily allowed and managed with utterances as explained in this Albert Rapp blog post (the visitor need a github account to be allowed to comment)\nManagement of non-existent web page\nStyling is very easy with themes, but customization can take a lot of time. This Albert Rapp video and related links can help to start.\n\n\n\n3.2 Content organization\nCurrently, the GENODESY website is organized in the following four main parts. As this site is pretty new, it will hopefully grow and evolve.\n\nHome: this part is empty for the moment. My intend is to point to the different contents and resources offered on this site.\nServices: applications, databases or APIs made available on this site.\nAuthor: who I am and what I’ve done.\nBlog: standalone topics addressing more or less technical issues or experiences. I moved this blog on my personal website which, I think, is more relevant."
+  },
+  {
+    "objectID": "posts/creating-website.html#other-services",
+    "href": "posts/creating-website.html#other-services",
+    "title": "Setting-up GENODESY",
+    "section": "4 Other services",
+    "text": "4 Other services\nOne of the advantages of using a reverse proxy such as NGINX is that we can focus on services installation without having to worry too much about how to secure their access. I’ve shown above how I configured NGINX to provide an access to a Neo4j API and to Shiny applications through SSL encryption. The paragraphs below explain how the services themselves were installed and can be used.\n\n4.1 BED Neo4j database\nBED (Biological Entity Dictionary) is an R package to get and explore mapping between identifiers of biological entities (BE). It relies on a Neo4j database in which the relationships between the identifiers from different sources are recorded. I made an instance of the BED Neo4j database available on this server to allow people to easily test the package and its capabilities.\nThe BED Neo4j database was installed as docker container, using the S05-BED-Container.sh script.\nThe access to the 5454 port is denied by the firewall, but NGINX provides a secure access to this resource via this path: https://genodesy.org/BED/. Therefore, external users can connect to the BED database in R as follows:\n\nlibrary(BED)\nconnectToBed(url=\"https://genodesy.org/BED/\")\n\nhttps://genodesy.org/BED/\n\n\nBED\n\n\nUCB-Human\n\n\n2024.01.14\n\n\nCache OFF\n\n\n\n\n4.2 Shiny server\nShiny is an R package to build interactive web apps straight from R. These apps can be easily deployed on services such as shinyapps.io. It is also possible to host them within a Shiny Server instance.\nThe Shiny Server was simply installed following the instructions provided in the official administrator’s guide.\nAgain, the access to the 5454 port is denied by the firewall, but NGINX provides a secure access to this resource via this path: https://genodesy.org/shiny/. Here is an example of a Shiny app hosted on genodesy.org : https://genodesy.org/shiny/ReDaMoR."
+  },
+  {
+    "objectID": "posts/creating-website.html#license",
+    "href": "posts/creating-website.html#license",
+    "title": "Setting-up GENODESY",
+    "section": "5 License",
+    "text": "5 License\nI chose to release the content of this website under a Creative Commons Attribution-ShareAlike 4.0 International License."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Patrice Godard",
+    "section": "",
+    "text": "Hello! I’m a data scientist and bioinformatician at Angelini Pharma, a international pharmaceutical company. I have strong experience in multiomics data analysis applied to therapeutic research. I mainly rely on the R programming language for which I have developed several libraries.\n\n\n\n\n\n\n\n\nComing from Montpellier, where I studied biochemistry, I’ve lived in Belgium for more than 20 years, in the pays de Charleroi. After my PhD at the ULB (Université Libre de Bruxelles), during which I studied computer science, data science and bioinformatics, and a postdoc at the University of Namur, I moved to the biotech industry focusing on pharmaceutical and medical applications."
+  },
+  {
+    "objectID": "blogroll.html",
+    "href": "blogroll.html",
+    "title": "Blogroll",
+    "section": "",
+    "text": "https://www.r-bloggers.com/"
+  }
+]

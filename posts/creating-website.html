@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.550">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Patrice Godard">
+<meta name="dcterms.date" content="2022-11-02">
+<meta name="description" content="Sharing experience regarding the creation of the GENODESY website and related web services">
+
+<title>Patrice Godard - Setting-up GENODESY</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-7RG3ZVT8WZ"></script>
+
+<script type="text/plain" cookie-consent="tracking">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-7RG3ZVT8WZ', { 'anonymize_ip': true});
+</script>
+
+<script type="text/javascript" charset="UTF-8">
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({
+  "notice_banner_type":"headline",
+  "consent_type":"implied",
+  "palette":"light",
+  "language":"en",
+  "page_load_consent_levels":["strictly-necessary","functionality","tracking","targeting"],
+  "notice_banner_reject_button_hide":false,
+  "preferences_center_close_button_hide":false,
+  "website_name":""
+  ,
+"language":"en"
+  });
+});
+</script> 
+  
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Patrice Godard - Setting-up GENODESY">
+<meta property="og:description" content="Sharing experience regarding the creation of the GENODESY website and related web services">
+<meta property="og:image" content="https://patzaw.github.io/posts/images/Build-website.jpg">
+<meta property="og:site_name" content="Patrice Godard">
+<meta name="twitter:title" content="Patrice Godard - Setting-up GENODESY">
+<meta name="twitter:description" content="Sharing experience regarding the creation of the GENODESY website and related web services">
+<meta name="twitter:image" content="https://patzaw.github.io/posts/images/Build-website.jpg">
+<meta name="twitter:creator" content="@PatriceGodard">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Patrice Godard</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://genodesy.org"> 
+<span class="menu-text">GENODESY</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tools.html"> 
+<span class="menu-text">Tools</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-more" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">More</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-more">    
+        <li>
+    <a class="dropdown-item" href="../blogroll.html">
+ <span class="dropdown-text">Blogroll</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item compact">
+    <a class="nav-link" href="../blog.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#hosting-the-services" id="toc-hosting-the-services" class="nav-link active" data-scroll-target="#hosting-the-services"><span class="header-section-number">1</span> Hosting the services</a></li>
+  <li><a href="#web-server-and-reverse-proxy" id="toc-web-server-and-reverse-proxy" class="nav-link" data-scroll-target="#web-server-and-reverse-proxy"><span class="header-section-number">2</span> Web server and reverse proxy</a>
+  <ul class="collapse">
+  <li><a href="#sec-nginx" id="toc-sec-nginx" class="nav-link" data-scroll-target="#sec-nginx"><span class="header-section-number">2.1</span> NGINX configuration</a></li>
+  <li><a href="#ssl-certificate" id="toc-ssl-certificate" class="nav-link" data-scroll-target="#ssl-certificate"><span class="header-section-number">2.2</span> SSL certificate</a></li>
+  <li><a href="#firewall" id="toc-firewall" class="nav-link" data-scroll-target="#firewall"><span class="header-section-number">2.3</span> Firewall</a></li>
+  </ul></li>
+  <li><a href="#creating-and-managing-the-website" id="toc-creating-and-managing-the-website" class="nav-link" data-scroll-target="#creating-and-managing-the-website"><span class="header-section-number">3</span> Creating and managing the website</a>
+  <ul class="collapse">
+  <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation"><span class="header-section-number">3.1</span> Implementation</a></li>
+  <li><a href="#content-organization" id="toc-content-organization" class="nav-link" data-scroll-target="#content-organization"><span class="header-section-number">3.2</span> Content organization</a></li>
+  </ul></li>
+  <li><a href="#other-services" id="toc-other-services" class="nav-link" data-scroll-target="#other-services"><span class="header-section-number">4</span> Other services</a>
+  <ul class="collapse">
+  <li><a href="#bed-neo4j-database" id="toc-bed-neo4j-database" class="nav-link" data-scroll-target="#bed-neo4j-database"><span class="header-section-number">4.1</span> BED Neo4j database</a></li>
+  <li><a href="#shiny-server" id="toc-shiny-server" class="nav-link" data-scroll-target="#shiny-server"><span class="header-section-number">4.2</span> Shiny server</a></li>
+  </ul></li>
+  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license"><span class="header-section-number">5</span> License</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Setting-up <span class="tm">GENODESY</span></h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">infrastructure</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Sharing experience regarding the creation of the <span class="tm">GENODESY</span> website and related web services
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Patrice Godard </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 2, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><img src="images/Build-website.jpg" class="img-fluid" alt="Website construction illustration adapted from https://commons.wikimedia.org/wiki/File:Build-website.jpg" width="800"></p>
+<p>After having bought the domain name a few years ago, I’ve finally decided to setup the <span class="tm">GENODESY</span> website and related resources. Here, I share my experience regarding this process: the tools and services I relied on and the design and technical choices I made.</p>
+<p>My intend was to setup, not only a website and a blog, but also some services such as <a href="https://shiny.rstudio.com/">Shiny</a> applications, <a href="https://neo4j.com/">Neo4j</a> and <a href="https://clickhouse.com/">ClickHouse</a> databases. That’s why I chose to rent a dedicated server that I configured and that I’m administrating myself. I spent time in tuning the configuration of the different services in order to make them as accessible as possible to the users:</p>
+<ul>
+<li>All the services are reachable from the same root: <a href="https://genodesy.org" class="uri">https://genodesy.org</a>.</li>
+<li>All the services are provided through the same secure SSL connection.</li>
+</ul>
+<section id="hosting-the-services" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="hosting-the-services"><span class="header-section-number">1</span> Hosting the services</h2>
+<p>There are many companies providing capabilities for hosting web pages and web services. Here, I chose <a href="https://www.ovhcloud.com/">OVHCloud</a>, a french cloud computing company. I went for the first option in the <em>kimsufi</em> range of dedicated servers:</p>
+<ul>
+<li>CPU: Intel Xeon E3-1245v2 - 4c/8t - 3.4 GHz/3.8 GHz</li>
+<li>Memory: 32 GB DDR3</li>
+<li>Storage: 3 x 2 TB HDD SATA Soft RAID</li>
+<li>OS: Ubuntu Server 22.04 LTS “Jammy Jellyfish”</li>
+</ul>
+<p>I also bought the genodesy domain names (.org, .com, .net, .info and .biz) to <a href="https://www.ovhcloud.com/">OVHCloud</a> and it was easy to map <em>genodesy.org</em> to the server IP address in the DNS (Domain Name System) using their configuration tool.</p>
+</section>
+<section id="web-server-and-reverse-proxy" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="web-server-and-reverse-proxy"><span class="header-section-number">2</span> Web server and reverse proxy</h2>
+<section id="sec-nginx" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="sec-nginx"><span class="header-section-number">2.1</span> NGINX configuration</h3>
+<p>I chose the <a href="https://nginx.org/en/">NGINX</a> web server to make the website available. NGINX can also be used as a reverse proxy, and I took advantage of this feature to provide other services.</p>
+<p>I followed the following tutorials to get familiar with NGINX configuration:</p>
+<ul>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-20-04">Install NGINX in Ubuntu (digital ocean)</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-20-04-1">Self-signed SSL certificates for NGINX (digital ocean)</a></li>
+<li>Reverse proxy configuration:
+<ul>
+<li><a href="https://serverfault.com/questions/536576/nginx-how-do-i-forward-an-http-request-to-another-port">How to forward an http request to another port?</a></li>
+<li><a href="https://support.rstudio.com/hc/en-us/articles/213733868-Running-Shiny-Server-with-a-Proxy">Running a Shiny server with a proxy</a></li>
+</ul></li>
+</ul>
+<p>I configured the <em>genodesy.org</em> server block to setup the following behaviors:</p>
+<ul>
+<li>redirect http (80) queries to the https (443) port</li>
+<li>provide services through the https (443) port using a valid SSL (Secure Sockets Layer) certificate</li>
+<li>proxy pass queries to specific path to services using different ports (e.g.&nbsp;shiny or neo4j)</li>
+</ul>
+<p>Here is the server block configuration file I’ve finally written:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>/etc/nginx/sites-available/genodesy.org</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="/etc/nginx/sites-available/genodesy.org"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Queries to the http (80) port are redirected to the https (443) port</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">server</span> {</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="ex">listen</span> 80 default_server<span class="kw">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="ex">listen</span> <span class="pp">[</span><span class="ss">::</span><span class="pp">]</span>:80 default_server<span class="kw">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="ex">server_name</span> genodesy.org www.genodesy.org<span class="kw">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="ex">location</span> / {</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="dv">301</span> <span class="ex">https://</span><span class="va">$server_name$request_uri</span><span class="kw">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="er">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="ex">root</span> /var/www/genodesy.org/html<span class="kw">;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="ex">index</span> index.html<span class="kw">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The following folder is used to verify the domain of issued SSL</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># certificate and therefore is still accessible through the http (80) port.</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="ex">location</span> /.well-known/pki-validation/ {</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="ex">try_files</span> <span class="va">$uri</span> <span class="va">$uri</span>/ =404<span class="kw">;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="er">}</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="er">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Services are provided through the https (443) port</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="ex">server</span> {</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="ex">listen</span> 443 ssl http2 default_server<span class="kw">;</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="ex">listen</span> <span class="pp">[</span><span class="ss">::</span><span class="pp">]</span>:443 ssl http2 default_server<span class="kw">;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># The files included below are used for SSL configuration</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="ex">include</span> snippets/ssl-for-free.conf<span class="kw">;</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="ex">include</span> snippets/ssl-params.conf<span class="kw">;</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="ex">root</span> /var/www/genodesy.org/html<span class="kw">;</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="ex">index</span> index.html index.htm index.nginx-debian.html<span class="kw">;</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="ex">error_page</span> 404 /404.html<span class="kw">;</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        <span class="ex">server_name</span> genodesy.org www.genodesy.org<span class="kw">;</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="co"># The main web server</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="ex">location</span> / {</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>                <span class="ex">try_files</span> <span class="va">$uri</span> <span class="va">$uri</span>/ =404<span class="kw">;</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        <span class="er">}</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reverse proxy to the BED Neo4j database hosted on port 5454</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        <span class="ex">location</span> /BED {</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>            <span class="ex">rewrite</span> ^/BED/<span class="pp">?(</span>.<span class="pp">*)</span>$ /<span class="va">$1</span> break<span class="kw">;</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>            <span class="ex">proxy_pass</span> http://genodesy.org:5454/browser<span class="kw">;</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            <span class="ex">proxy_redirect</span> / <span class="va">$scheme</span>://<span class="va">$http_host</span>/BED<span class="kw">;</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>        <span class="er">}</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reverse proxy to Shiny hosted on port 3838</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        <span class="ex">rewrite</span> ^/shiny$ <span class="va">$scheme</span>://<span class="va">$http_host</span>/shiny/ permanent<span class="kw">;</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        <span class="ex">location</span> /shiny/ {</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>            <span class="ex">rewrite</span> ^/shiny/<span class="er">(</span><span class="bu">.</span><span class="pp">*</span><span class="kw">)</span><span class="ex">$</span> /<span class="va">$1</span> break<span class="kw">;</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>            <span class="ex">proxy_pass</span> http://genodesy.org:3838<span class="kw">;</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>            <span class="ex">proxy_redirect</span> / <span class="va">$scheme</span>://<span class="va">$http_host</span>/shiny/<span class="kw">;</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>        <span class="er">}</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="er">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="ssl-certificate" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="ssl-certificate"><span class="header-section-number">2.2</span> SSL certificate</h3>
+<p>I created a free valid SSL certificate on <a href="https://www.sslforfree.com/">SSL For Free</a>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Certificate chain file in NGINX
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In NGINX, the <code>ca_bundle.crt</code> certificate chain file must be appended to the <code>certificate.crt</code> file to make it valid and allow the verification of the domain by <a href="https://zerossl.com/">ZeroSSL</a>. (tip found <a href="https://blog.steven266.de/include-a-certificate-chain-file-in-nginx-6dca9acdcbb6">here</a>)</p>
+</div>
+</div>
+</section>
+<section id="firewall" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="firewall"><span class="header-section-number">2.3</span> Firewall</h3>
+<p>The <a href="https://www.linux.com/training-tutorials/introduction-uncomplicated-firewall-ufw/">Uncomplicated Firewall (UFW)</a> was used to allow connections only to specific ports supporting protocols of interest: ssh (22), http (80) and https (443).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install ufw</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw enable</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 22/tcp</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 80/tcp</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ufw allow 443/tcp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="creating-and-managing-the-website" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="creating-and-managing-the-website"><span class="header-section-number">3</span> Creating and managing the website</h2>
+<section id="implementation" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="implementation"><span class="header-section-number">3.1</span> Implementation</h3>
+<p>As an <a href="https://www.r-project.org/">R</a> user and a big fan of tools developed by the <a href="https://posit.co/">Posit PBC</a> team, I’m relying on <a href="https://quarto.org/">Quarto</a> to create and manage the content of this website.</p>
+<p>There are many documentation resources regarding the Quarto publishing system, starting by the extensive <a href="https://quarto.org/docs/guide/">official guide</a>. Quarto has a lot of features and I don’t intend (to even try) to list all of them here. Instead, here are a few points on which I put particular attention or that I found particularly handy:</p>
+<ul>
+<li><p><a href="https://quarto.org/docs/websites/website-tools.html#google-analytics">Traffic information with Google analytics</a></p></li>
+<li><p><a href="https://quarto.org/docs/websites/website-blog.html">Blogging</a></p></li>
+<li><p><a href="https://quarto.org/docs/websites/website-about.html">About page</a></p></li>
+<li><p><a href="https://quarto.org/docs/websites/website-tools.html#cookie-consent">Cookie consent</a></p></li>
+<li><p>The creation of an <strong>RSS feeds</strong> focused on different categories is straightforward as explained in <a href="https://quarto.org/docs/websites/website-blog.html#rss-feed">Quarto documentation</a></p></li>
+<li><p><strong>Post comments</strong> can be easily allowed and managed with <a href="https://utteranc.es/">utterances</a> as explained in this <a href="https://albert-rapp.de/posts/13_quarto_blog_writing_guide/13_quarto_blog_writing_guide.html#interact-with-your-audience">Albert Rapp blog post</a> (the visitor need a github account to be allowed to comment)</p></li>
+<li><p><a href="https://quarto.org/docs/websites/website-navigation.html#pages-404">Management of non-existent web page</a></p></li>
+<li><p><a href="https://quarto.org/docs/output-formats/html-themes.html">Styling</a> is very easy with themes, but customization can take a lot of time. This <a href="https://www.youtube.com/watch?v=ErRX8plZpQE">Albert Rapp video and related links</a> can help to start.</p></li>
+</ul>
+</section>
+<section id="content-organization" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="content-organization"><span class="header-section-number">3.2</span> Content organization</h3>
+<p>Currently, the <span class="tm">GENODESY</span> website is organized in the following four main parts. As this site is pretty new, it will hopefully grow and evolve.</p>
+<ul>
+<li><p><strong>Home</strong>: this part is empty for the moment. My intend is to point to the different contents and resources offered on this site.</p></li>
+<li><p><strong>Services</strong>: applications, databases or APIs made available on this site.</p></li>
+<li><p><strong>Author</strong>: who I am and what I’ve done.</p></li>
+<li><p><strong>Blog</strong>: standalone topics addressing more or less technical issues or experiences. I moved this blog on my personal website which, I think, is more relevant.</p></li>
+</ul>
+</section>
+</section>
+<section id="other-services" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="other-services"><span class="header-section-number">4</span> Other services</h2>
+<p>One of the advantages of using a reverse proxy such as <a href="https://nginx.org/en/">NGINX</a> is that we can focus on services installation without having to worry too much about how to secure their access. I’ve shown <a href="#sec-nginx">above</a> how I configured NGINX to provide an access to a Neo4j API and to Shiny applications through SSL encryption. The paragraphs below explain how the services themselves were installed and can be used.</p>
+<section id="bed-neo4j-database" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="bed-neo4j-database"><span class="header-section-number">4.1</span> BED Neo4j database</h3>
+<p><a href="https://patzaw.github.io/BED/">BED</a> (Biological Entity Dictionary) is an R package to get and explore mapping between identifiers of biological entities (BE). It relies on a <a href="https://neo4j.com/">Neo4j</a> database in which the relationships between the identifiers from different sources are recorded. I made an instance of the BED Neo4j database available on this server to allow people to easily test the package and its capabilities.</p>
+<p>The BED Neo4j database was installed as <a href="https://www.docker.com/">docker</a> container, using the <a href="https://github.com/patzaw/BED/blob/master/supp/Build/S05-BED-Container.sh"><code>S05-BED-Container.sh</code> script</a>.</p>
+<p>The access to the 5454 port is denied by the firewall, but NGINX provides a secure access to this resource via this path: <code>https://genodesy.org/BED/</code>. Therefore, external users can connect to the BED database in R as follows:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(BED)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">connectToBed</span>(<span class="at">url=</span><span class="st">"https://genodesy.org/BED/"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>https://genodesy.org/BED/</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>BED</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>UCB-Human</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2024.01.14</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Cache OFF</code></pre>
+</div>
+</div>
+</section>
+<section id="shiny-server" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="shiny-server"><span class="header-section-number">4.2</span> Shiny server</h3>
+<p><a href="https://shiny.rstudio.com/">Shiny</a> is an R package to build interactive web apps straight from R. These apps can be easily deployed on services such as <a href="https://www.shinyapps.io/">shinyapps.io</a>. It is also possible to host them within a Shiny Server instance.</p>
+<p>The Shiny Server was simply installed following the instructions provided in the <a href="https://docs.rstudio.com/shiny-server/">official administrator’s guide</a>.</p>
+<p>Again, the access to the 5454 port is denied by the firewall, but NGINX provides a secure access to this resource via this path: <code>https://genodesy.org/shiny/</code>. Here is an example of a Shiny app hosted on <em>genodesy.org</em> : <a href="https://genodesy.org/shiny/ReDaMoR">https://genodesy.org/shiny/ReDaMoR</a>.</p>
+</section>
+</section>
+<section id="license" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="license"><span class="header-section-number">5</span> License</h2>
+<p>I chose to release the content of this website under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://utteranc.es/client.js" repo="patzaw/blogComments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2024 Patrice Godard<br>Made with <a href="https://quarto.org/">Quarto</a></p>
+</div>   
+    <div class="nav-footer-center">
+
+</div>
+    <div class="nav-footer-right">
+<p><a href="../license.html">License</a><br><span id="open_preferences_center">Cookie Preferences</span></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

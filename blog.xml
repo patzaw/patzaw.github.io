@@ -1,0 +1,946 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>Patrice Godard</title>
+<link>https://patzaw.github.io/blog.html</link>
+<atom:link href="https://patzaw.github.io/blog.xml" rel="self" type="application/rss+xml"/>
+<description>Personal website</description>
+<generator>quarto-1.4.550</generator>
+<lastBuildDate>Sun, 04 Feb 2024 23:00:00 GMT</lastBuildDate>
+<item>
+  <title>Create interactive figures from SVG images with {bscui}</title>
+  <dc:creator>Patrice Godard</dc:creator>
+  <link>https://patzaw.github.io/posts/bscui-presentation.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://patzaw.github.io/posts/images/bscui.png" class="img-fluid" alt="bscui logo" width="200"></p>
+<script src="https://patzaw.github.io/site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="https://patzaw.github.io/site_libs/bscui-0.0.3/bscui.min.js"></script>
+<script src="https://patzaw.github.io/site_libs/bscui-binding-0.1.5/bscui.js"></script>
+<p>The {<a href="https://patzaw.github.io/bscui">bscui</a>} R package, made recently available on <a href="https://cran.r-project.org/package=bscui">CRAN</a>, has been written to transform SVG images into interactive figures. It can be used to display data on a drawing in a report or to interact with the drawing in a R {<a href="https://shiny.posit.co/">shiny</a>} application. The example below is very basic and is made to give a general idea of the package principles. A more complete introduction is available in the <a href="https://patzaw.github.io/bscui/articles/bscui.html">package vignette</a>.</p>
+<p>Let’s load the package and start the demo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(bscui)</span></code></pre></div>
+</div>
+<section id="importing-an-svg-image" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="importing-an-svg-image"><span class="header-section-number">1</span> Importing an SVG image</h2>
+<p>In this example, we use an SVG representation of the heliocentric system taken from the W3C: <a href="https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg">https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg</a>. This SVG file can be read with the {<a href="https://xml2.r-lib.org/">xml2</a>} package:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">svg <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> xml2<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">read_xml</span>(</span>
+<span id="cb2-2">   <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/heliocentric.svg"</span></span>
+<span id="cb2-3">)</span></code></pre></div>
+</div>
+<p>The imported SVG can be directly displayed with the <code>bscui()</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">packageVersion</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bscui"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] '0.1.5'</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">bscui</span>(svg)</span></code></pre></div>
+<div class="cell-output-display">
+<div class="bscui html-widget html-fill-item" id="htmlwidget-32139ba080d7a1b24393" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-32139ba080d7a1b24393">{"x":{"svg_txt":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\">\n  <g stroke=\"#000\" fill=\"none\" stroke-width=\"0.2\">\n    <path d=\"M5,60 A16,30 60,1,1 95,40\"/>\n    <path d=\"M10,60 A15,30 60,1,1 90,40\"/>\n    <path d=\"M15,60 A14,30 60,1,1 85,40\"/>\n    <path d=\"M20,60 A13,30 60,1,1 80,40\"/>\n    <circle cx=\"40\" cy=\"24\" r=\"4\" fill=\"#C0C\" stroke=\"none\"/>\n    <circle cx=\"50\" cy=\"50\" r=\"25\" fill=\"#FD0\" stroke=\"none\"/>\n    <path d=\"M5,60 A16,30 60,0,0 95,40\"/>\n    <path d=\"M10,60 A15,30 60,0,0 90,40\"/>\n    <path d=\"M15,60 A14,30 60,0,0 85,40\"/>\n    <path d=\"M20,60 A13,30 60,0,0 80,40\"/>\n  <\/g>\n  <circle cx=\"60\" cy=\"61\" r=\"2\" fill=\"#F00\"/>\n  <circle cx=\"78\" cy=\"25\" r=\"3\" fill=\"#0F0\"/>\n  <circle cx=\"22\" cy=\"79\" r=\"3\" fill=\"#00F\"/>\n<\/svg>\n","ui_elements":null,"element_styles":[],"element_attributes":[],"sanitize_attributes":true,"show_menu":true,"menu_width":"30px","zoom_min":0.5,"zoom_max":20,"zoom_step":1.1,"clip":false,"default_png_scale":1,"selection_color":"orange","selection_opacity":0.5,"selection_width":4,"hover_color":{"button":"yellow","selectable":"cyan","none":"transparent"},"hover_opacity":0.5,"hover_width":4,"structure_shapes":["rect","circle","ellipse","line","polyline","polygon","path"],"dblclick_timeout":250,"hover_timeout":100},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>The figure can be grabbed with mouse and enlarged or shrunk using the mouse wheel. Clicking on the button at the top-left corner of the figure displays a menu with various functions, including resetting the view and exporting the figure in SVG or PNG format. Several configuration choices are made by default but can be changed with the <code>set_bscui_options()</code> function, such as the zoom range or the width of the menu.</p>
+</section>
+<section id="make-svg-elements-interactive" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="make-svg-elements-interactive"><span class="header-section-number">2</span> Make SVG elements interactive</h2>
+<p>We can interact with the figure above (grab, zoom…) but not with its elements. For example, we would like to be able to interact with the sun and the planets turning around it.</p>
+<p>To make it possible, we need the SVG elements to be identifiable with an ‘id’ attribute. Unfortunately, it is not the case in the SVG file we took. Thus, let’s add first this attribute with {xml2}.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">xml2<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">xml_ns_strip</span>(svg)</span>
+<span id="cb6-2">circles <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> xml2<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">xml_find_all</span>(svg, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"//circle"</span>)</span>
+<span id="cb6-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span>(i <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(circles)){</span>
+<span id="cb6-4">   circle <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> circles[[i]]</span>
+<span id="cb6-5">   color <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> xml2<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">xml_attr</span>(circle, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fill"</span>)</span>
+<span id="cb6-6">   <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span>(color <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#FD0"</span>){</span>
+<span id="cb6-7">      id <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Sun"</span></span>
+<span id="cb6-8">   }</span>
+<span id="cb6-9">   <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span>(color <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#F00"</span>){</span>
+<span id="cb6-10">      id <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mercury"</span></span>
+<span id="cb6-11">   }</span>
+<span id="cb6-12">   <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span>(color <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#0F0"</span>){</span>
+<span id="cb6-13">      id <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Venus"</span></span>
+<span id="cb6-14">   }</span>
+<span id="cb6-15">   <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span>(color <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#00F"</span>){</span>
+<span id="cb6-16">      id <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Earth"</span></span>
+<span id="cb6-17">   }</span>
+<span id="cb6-18">   <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span>(color <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#C0C"</span>){</span>
+<span id="cb6-19">      id <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mars"</span></span>
+<span id="cb6-20">   }</span>
+<span id="cb6-21">   xml2<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">xml_attr</span>(circle, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"id"</span>) <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> id</span>
+<span id="cb6-22">}</span></code></pre></div>
+</div>
+<p>The elements can then be made interactive with the <code>set_bscui_ui_elements()</code> function which takes as second argument a data frame with the following columns:</p>
+<ul>
+<li><strong>id</strong>: the element identifier</li>
+<li><strong>ui_type</strong>: either “selectable” (several elements can be selected), “button” (action will be triggered by clicking), “none” (no action on click)</li>
+<li><strong>title</strong>: a description of the element to display when the mouse hovers over the element</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">ui_elements <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">data.frame</span>(</span>
+<span id="cb7-2">   <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">id =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Sun"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mercury"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Venus"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Earth"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mars"</span>),</span>
+<span id="cb7-3">   <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ui_type =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"button"</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"selectable"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span>
+<span id="cb7-4">)</span>
+<span id="cb7-5">wp_links <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(</span>
+<span id="cb7-6">   <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Sun"</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://en.wikipedia.org/wiki/Sun"</span>, </span>
+<span id="cb7-7">   <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mercury"</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://en.wikipedia.org/wiki/Mercury_(planet)"</span>, </span>
+<span id="cb7-8">   <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Venus"</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://en.wikipedia.org/wiki/Venus"</span>, </span>
+<span id="cb7-9">   <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Earth"</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://en.wikipedia.org/wiki/Earth"</span>, </span>
+<span id="cb7-10">   <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mars"</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://en.wikipedia.org/wiki/Mars"</span></span>
+<span id="cb7-11">)</span>
+<span id="cb7-12">ui_elements<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>title <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sprintf</span>(</span>
+<span id="cb7-13">   <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">paste</span>(</span>
+<span id="cb7-14">      <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'&lt;div style="padding:5px;'</span>,</span>
+<span id="cb7-15">      <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'border:black 1px solid; background:#FFFFF0AA;"&gt;'</span>,</span>
+<span id="cb7-16">      <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'&lt;strong&gt;&lt;a href="%s" target="_blank"&gt;%s&lt;/a&gt;&lt;/strong&gt;'</span>,</span>
+<span id="cb7-17">      <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'&lt;/div&gt;'</span></span>
+<span id="cb7-18">   ),</span>
+<span id="cb7-19">   wp_links[ui_elements<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>id], ui_elements<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>id</span>
+<span id="cb7-20">)</span>
+<span id="cb7-21"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">bscui</span>(svg) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-22">   <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">set_bscui_ui_elements</span>(ui_elements)</span></code></pre></div>
+<div class="cell-output-display">
+<div class="bscui html-widget html-fill-item" id="htmlwidget-5719d7d3080e56207ccf" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-5719d7d3080e56207ccf">{"x":{"svg_txt":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg viewBox=\"0 0 100 100\">\n  <g stroke=\"#000\" fill=\"none\" stroke-width=\"0.2\">\n    <path d=\"M5,60 A16,30 60,1,1 95,40\"/>\n    <path d=\"M10,60 A15,30 60,1,1 90,40\"/>\n    <path d=\"M15,60 A14,30 60,1,1 85,40\"/>\n    <path d=\"M20,60 A13,30 60,1,1 80,40\"/>\n    <circle cx=\"40\" cy=\"24\" r=\"4\" fill=\"#C0C\" stroke=\"none\" id=\"Mars\"/>\n    <circle cx=\"50\" cy=\"50\" r=\"25\" fill=\"#FD0\" stroke=\"none\" id=\"Sun\"/>\n    <path d=\"M5,60 A16,30 60,0,0 95,40\"/>\n    <path d=\"M10,60 A15,30 60,0,0 90,40\"/>\n    <path d=\"M15,60 A14,30 60,0,0 85,40\"/>\n    <path d=\"M20,60 A13,30 60,0,0 80,40\"/>\n  <\/g>\n  <circle cx=\"60\" cy=\"61\" r=\"2\" fill=\"#F00\" id=\"Mercury\"/>\n  <circle cx=\"78\" cy=\"25\" r=\"3\" fill=\"#0F0\" id=\"Venus\"/>\n  <circle cx=\"22\" cy=\"79\" r=\"3\" fill=\"#00F\" id=\"Earth\"/>\n<\/svg>\n","ui_elements":{"id":["Sun","Mercury","Venus","Earth","Mars"],"ui_type":["button","selectable","selectable","selectable","selectable"],"title":["<div style=\"padding:5px; border:black 1px solid; background:#FFFFF0AA;\"> <strong><a href=\"https://en.wikipedia.org/wiki/Sun\" target=\"_blank\">Sun<\/a><\/strong> <\/div>","<div style=\"padding:5px; border:black 1px solid; background:#FFFFF0AA;\"> <strong><a href=\"https://en.wikipedia.org/wiki/Mercury_(planet)\" target=\"_blank\">Mercury<\/a><\/strong> <\/div>","<div style=\"padding:5px; border:black 1px solid; background:#FFFFF0AA;\"> <strong><a href=\"https://en.wikipedia.org/wiki/Venus\" target=\"_blank\">Venus<\/a><\/strong> <\/div>","<div style=\"padding:5px; border:black 1px solid; background:#FFFFF0AA;\"> <strong><a href=\"https://en.wikipedia.org/wiki/Earth\" target=\"_blank\">Earth<\/a><\/strong> <\/div>","<div style=\"padding:5px; border:black 1px solid; background:#FFFFF0AA;\"> <strong><a href=\"https://en.wikipedia.org/wiki/Mars\" target=\"_blank\">Mars<\/a><\/strong> <\/div>"]},"element_styles":[],"element_attributes":[],"sanitize_attributes":true,"show_menu":true,"menu_width":"30px","zoom_min":0.5,"zoom_max":20,"zoom_step":1.1,"clip":false,"default_png_scale":1,"selection_color":"orange","selection_opacity":0.5,"selection_width":4,"hover_color":{"button":"yellow","selectable":"cyan","none":"transparent"},"hover_opacity":0.5,"hover_width":4,"structure_shapes":["rect","circle","ellipse","line","polyline","polygon","path"],"dblclick_timeout":250,"hover_timeout":100},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>The identified elements can be further customized with the <code>set_bscui_styles()</code> and the <code>set_bscui_attributes()</code> functions.</p>
+</section>
+<section id="shiny" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="shiny"><span class="header-section-number">3</span> Shiny</h2>
+<p>The identified elements can be further leveraged in a shiny application. The code chunk below show a very simple example of such an application with the heliocentric SVG image used so far.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(shiny)</span>
+<span id="cb8-2">ui <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fluidPage</span>(</span>
+<span id="cb8-3">   <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fluidRow</span>(</span>
+<span id="cb8-4">      <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">column</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">bscuiOutput</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"heliocentric"</span>)),</span>
+<span id="cb8-5">      <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">column</span>(</span>
+<span id="cb8-6">         <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>,</span>
+<span id="cb8-7">         tags<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ul</span>(</span>
+<span id="cb8-8">            tags<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">li</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Hovered:"</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">textOutput</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"hovered"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">inline=</span><span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>)),</span>
+<span id="cb8-9">            tags<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">li</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Operated button:"</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">textOutput</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"operated"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">inline=</span><span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>)),</span>
+<span id="cb8-10">            tags<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">li</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Selected:"</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">textOutput</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"selected"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">inline=</span><span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>))</span>
+<span id="cb8-11">         )</span>
+<span id="cb8-12">      )</span>
+<span id="cb8-13">   )</span>
+<span id="cb8-14">)</span>
+<span id="cb8-15">server <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">function</span>(input, output, session){</span>
+<span id="cb8-16">   output<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>heliocentric <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">renderBscui</span>({</span>
+<span id="cb8-17">      <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">bscui</span>(svg)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb8-18">         <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">set_bscui_ui_elements</span>(ui_elements)</span>
+<span id="cb8-19">   })</span>
+<span id="cb8-20">   output<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>hovered <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">renderText</span>({</span>
+<span id="cb8-21">      input<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>heliocentric_hovered</span>
+<span id="cb8-22">   })</span>
+<span id="cb8-23">   output<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>operated <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">renderText</span>({</span>
+<span id="cb8-24">      <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">print</span>(input<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>heliocentric_operated)</span>
+<span id="cb8-25">      <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sprintf</span>(</span>
+<span id="cb8-26">         <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"%s (%s click)"</span>,</span>
+<span id="cb8-27">         input<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>heliocentric_operated<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>id,</span>
+<span id="cb8-28">         input<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>heliocentric_operated<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>click</span>
+<span id="cb8-29">      )</span>
+<span id="cb8-30">   })</span>
+<span id="cb8-31">   output<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>selected <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">renderText</span>({</span>
+<span id="cb8-32">      input<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>heliocentric_selected</span>
+<span id="cb8-33">   })</span>
+<span id="cb8-34">}</span>
+<span id="cb8-35"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">runApp</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">shinyApp</span>(ui, server))</span></code></pre></div>
+</div>
+<p>The <code>bscuiOutput()</code> and <code>renderBscui()</code> functions are used to instantiate the widget and the following information is exposed to Shiny:</p>
+<ul>
+<li><code>input$bscuiID_hovered</code> reports selected elements</li>
+<li><code>input$bscuiID_hovered</code> reports operated button elements</li>
+<li><code>input$bscuiID_hovered</code> reports hovered elements</li>
+</ul>
+<p><code>bscuiID</code> is used to refer to the figure output id, “heliocentric” in the example above.</p>
+<section id="figure-modification" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="figure-modification"><span class="header-section-number">3.1</span> Figure modification</h3>
+<p>The figure can also be modified based on Shiny events by creating a “bscui_Proxy” object. It’s done by calling the <code>bscuiProxy()</code> within the sever function. Functions like <code>order_bscui_elements()</code>, <code>add_bscui_element()</code> and <code>remove_bscui_elements()</code> are used to modify the SVG structure. The <code>update_bscui_ui_elements()</code>, <code>update_bscui_attributes()</code> and <code>update_bscui_styles()</code> functions are used to update identified elements. Finally the <code>update_bscui_selection()</code> and <code>click_bscui_element()</code> functions are used to trigger specific elements.</p>
+<p>All the functions above are further described and exemplified in the <a href="https://patzaw.github.io/bscui/articles/bscui.html">package vignette</a>. And an advanced Shiny application is provided within the package:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">shiny<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">runApp</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">system.file</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"examples"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"shiny-anatomogram"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">package =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bscui"</span>))</span></code></pre></div>
+</div>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>R</category>
+  <category>Visualization</category>
+  <guid>https://patzaw.github.io/posts/bscui-presentation.html</guid>
+  <pubDate>Sun, 04 Feb 2024 23:00:00 GMT</pubDate>
+  <media:content url="https://patzaw.github.io/posts/images/bscui.png" medium="image" type="image/png" height="163" width="144"/>
+</item>
+<item>
+  <title>Setting-up GENODESY</title>
+  <dc:creator>Patrice Godard</dc:creator>
+  <link>https://patzaw.github.io/posts/creating-website.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><img src="https://patzaw.github.io/posts/images/Build-website.jpg" class="img-fluid" alt="Website construction illustration adapted from https://commons.wikimedia.org/wiki/File:Build-website.jpg" width="800"></p>
+<p>After having bought the domain name a few years ago, I’ve finally decided to setup the <span class="tm">GENODESY</span> website and related resources. Here, I share my experience regarding this process: the tools and services I relied on and the design and technical choices I made.</p>
+<p>My intend was to setup, not only a website and a blog, but also some services such as <a href="https://shiny.rstudio.com/">Shiny</a> applications, <a href="https://neo4j.com/">Neo4j</a> and <a href="https://clickhouse.com/">ClickHouse</a> databases. That’s why I chose to rent a dedicated server that I configured and that I’m administrating myself. I spent time in tuning the configuration of the different services in order to make them as accessible as possible to the users:</p>
+<ul>
+<li>All the services are reachable from the same root: <a href="https://genodesy.org" class="uri">https://genodesy.org</a>.</li>
+<li>All the services are provided through the same secure SSL connection.</li>
+</ul>
+<section id="hosting-the-services" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="hosting-the-services"><span class="header-section-number">1</span> Hosting the services</h2>
+<p>There are many companies providing capabilities for hosting web pages and web services. Here, I chose <a href="https://www.ovhcloud.com/">OVHCloud</a>, a french cloud computing company. I went for the first option in the <em>kimsufi</em> range of dedicated servers:</p>
+<ul>
+<li>CPU: Intel Xeon E3-1245v2 - 4c/8t - 3.4 GHz/3.8 GHz</li>
+<li>Memory: 32 GB DDR3</li>
+<li>Storage: 3 x 2 TB HDD SATA Soft RAID</li>
+<li>OS: Ubuntu Server 22.04 LTS “Jammy Jellyfish”</li>
+</ul>
+<p>I also bought the genodesy domain names (.org, .com, .net, .info and .biz) to <a href="https://www.ovhcloud.com/">OVHCloud</a> and it was easy to map <em>genodesy.org</em> to the server IP address in the DNS (Domain Name System) using their configuration tool.</p>
+</section>
+<section id="web-server-and-reverse-proxy" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="web-server-and-reverse-proxy"><span class="header-section-number">2</span> Web server and reverse proxy</h2>
+<section id="sec-nginx" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="sec-nginx"><span class="header-section-number">2.1</span> NGINX configuration</h3>
+<p>I chose the <a href="https://nginx.org/en/">NGINX</a> web server to make the website available. NGINX can also be used as a reverse proxy, and I took advantage of this feature to provide other services.</p>
+<p>I followed the following tutorials to get familiar with NGINX configuration:</p>
+<ul>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-20-04">Install NGINX in Ubuntu (digital ocean)</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-in-ubuntu-20-04-1">Self-signed SSL certificates for NGINX (digital ocean)</a></li>
+<li>Reverse proxy configuration:
+<ul>
+<li><a href="https://serverfault.com/questions/536576/nginx-how-do-i-forward-an-http-request-to-another-port">How to forward an http request to another port?</a></li>
+<li><a href="https://support.rstudio.com/hc/en-us/articles/213733868-Running-Shiny-Server-with-a-Proxy">Running a Shiny server with a proxy</a></li>
+</ul></li>
+</ul>
+<p>I configured the <em>genodesy.org</em> server block to setup the following behaviors:</p>
+<ul>
+<li>redirect http (80) queries to the https (443) port</li>
+<li>provide services through the https (443) port using a valid SSL (Secure Sockets Layer) certificate</li>
+<li>proxy pass queries to specific path to services using different ports (e.g.&nbsp;shiny or neo4j)</li>
+</ul>
+<p>Here is the server block configuration file I’ve finally written:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>/etc/nginx/sites-available/genodesy.org</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="/etc/nginx/sites-available/genodesy.org" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb1-1"></span>
+<span id="cb1-2"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Queries to the http (80) port are redirected to the https (443) port</span></span>
+<span id="cb1-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">server</span> {</span>
+<span id="cb1-4">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">listen</span> 80 default_server<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-5">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">listen</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">[</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">::</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">]</span>:80 default_server<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-6">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">server_name</span> genodesy.org www.genodesy.org<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-7">    </span>
+<span id="cb1-8">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">location</span> / {</span>
+<span id="cb1-9">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">301</span> <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">https://</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$server_name$request_uri</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-10">    <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-11">    </span>
+<span id="cb1-12">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">root</span> /var/www/genodesy.org/html<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-13">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">index</span> index.html<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-14">    </span>
+<span id="cb1-15">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The following folder is used to verify the domain of issued SSL</span></span>
+<span id="cb1-16">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># certificate and therefore is still accessible through the http (80) port.</span></span>
+<span id="cb1-17">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">location</span> /.well-known/pki-validation/ {</span>
+<span id="cb1-18">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">try_files</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$uri</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$uri</span>/ =404<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-19">    <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-20"><span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-21"></span>
+<span id="cb1-22"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Services are provided through the https (443) port</span></span>
+<span id="cb1-23"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">server</span> {</span>
+<span id="cb1-24">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">listen</span> 443 ssl http2 default_server<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-25">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">listen</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">[</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">::</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">]</span>:443 ssl http2 default_server<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-26">        </span>
+<span id="cb1-27">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The files included below are used for SSL configuration</span></span>
+<span id="cb1-28">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">include</span> snippets/ssl-for-free.conf<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-29">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">include</span> snippets/ssl-params.conf<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-30"></span>
+<span id="cb1-31"></span>
+<span id="cb1-32">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">root</span> /var/www/genodesy.org/html<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-33">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">index</span> index.html index.htm index.nginx-debian.html<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-34">        </span>
+<span id="cb1-35">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">error_page</span> 404 /404.html<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-36"></span>
+<span id="cb1-37">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">server_name</span> genodesy.org www.genodesy.org<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-38"></span>
+<span id="cb1-39">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The main web server</span></span>
+<span id="cb1-40">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">location</span> / {</span>
+<span id="cb1-41">                <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">try_files</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$uri</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$uri</span>/ =404<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-42">        <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-43">        </span>
+<span id="cb1-44">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Reverse proxy to the BED Neo4j database hosted on port 5454</span></span>
+<span id="cb1-45">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">location</span> /BED {</span>
+<span id="cb1-46">            <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">rewrite</span> ^/BED/<span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">?(</span>.<span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">*)</span>$ /<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$1</span> break<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-47">            <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">proxy_pass</span> http://genodesy.org:5454/browser<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-48">            <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">proxy_redirect</span> / <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$scheme</span>://<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$http_host</span>/BED<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-49">        <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-50">        </span>
+<span id="cb1-51">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Reverse proxy to Shiny hosted on port 3838</span></span>
+<span id="cb1-52">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">rewrite</span> ^/shiny$ <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$scheme</span>://<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$http_host</span>/shiny/ permanent<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-53">        <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">location</span> /shiny/ {</span>
+<span id="cb1-54">            <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">rewrite</span> ^/shiny/<span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">.</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">*</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">$</span> /<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$1</span> break<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-55">            <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">proxy_pass</span> http://genodesy.org:3838<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-56">            <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">proxy_redirect</span> / <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$scheme</span>://<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$http_host</span>/shiny/<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-57">        <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-58">        </span>
+<span id="cb1-59"><span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+</div>
+</section>
+<section id="ssl-certificate" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="ssl-certificate"><span class="header-section-number">2.2</span> SSL certificate</h3>
+<p>I created a free valid SSL certificate on <a href="https://www.sslforfree.com/">SSL For Free</a>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Certificate chain file in NGINX
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In NGINX, the <code>ca_bundle.crt</code> certificate chain file must be appended to the <code>certificate.crt</code> file to make it valid and allow the verification of the domain by <a href="https://zerossl.com/">ZeroSSL</a>. (tip found <a href="https://blog.steven266.de/include-a-certificate-chain-file-in-nginx-6dca9acdcbb6">here</a>)</p>
+</div>
+</div>
+</section>
+<section id="firewall" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="firewall"><span class="header-section-number">2.3</span> Firewall</h3>
+<p>The <a href="https://www.linux.com/training-tutorials/introduction-uncomplicated-firewall-ufw/">Uncomplicated Firewall (UFW)</a> was used to allow connections only to specific ports supporting protocols of interest: ssh (22), http (80) and https (443).</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt-get install ufw</span>
+<span id="cb2-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> ufw enable</span>
+<span id="cb2-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> ufw allow 22/tcp</span>
+<span id="cb2-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> ufw allow 80/tcp</span>
+<span id="cb2-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> ufw allow 443/tcp</span></code></pre></div>
+</section>
+</section>
+<section id="creating-and-managing-the-website" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="creating-and-managing-the-website"><span class="header-section-number">3</span> Creating and managing the website</h2>
+<section id="implementation" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="implementation"><span class="header-section-number">3.1</span> Implementation</h3>
+<p>As an <a href="https://www.r-project.org/">R</a> user and a big fan of tools developed by the <a href="https://posit.co/">Posit PBC</a> team, I’m relying on <a href="https://quarto.org/">Quarto</a> to create and manage the content of this website.</p>
+<p>There are many documentation resources regarding the Quarto publishing system, starting by the extensive <a href="https://quarto.org/docs/guide/">official guide</a>. Quarto has a lot of features and I don’t intend (to even try) to list all of them here. Instead, here are a few points on which I put particular attention or that I found particularly handy:</p>
+<ul>
+<li><p><a href="https://quarto.org/docs/websites/website-tools.html#google-analytics">Traffic information with Google analytics</a></p></li>
+<li><p><a href="https://quarto.org/docs/websites/website-blog.html">Blogging</a></p></li>
+<li><p><a href="https://quarto.org/docs/websites/website-about.html">About page</a></p></li>
+<li><p><a href="https://quarto.org/docs/websites/website-tools.html#cookie-consent">Cookie consent</a></p></li>
+<li><p>The creation of an <strong>RSS feeds</strong> focused on different categories is straightforward as explained in <a href="https://quarto.org/docs/websites/website-blog.html#rss-feed">Quarto documentation</a></p></li>
+<li><p><strong>Post comments</strong> can be easily allowed and managed with <a href="https://utteranc.es/">utterances</a> as explained in this <a href="https://albert-rapp.de/posts/13_quarto_blog_writing_guide/13_quarto_blog_writing_guide.html#interact-with-your-audience">Albert Rapp blog post</a> (the visitor need a github account to be allowed to comment)</p></li>
+<li><p><a href="https://quarto.org/docs/websites/website-navigation.html#pages-404">Management of non-existent web page</a></p></li>
+<li><p><a href="https://quarto.org/docs/output-formats/html-themes.html">Styling</a> is very easy with themes, but customization can take a lot of time. This <a href="https://www.youtube.com/watch?v=ErRX8plZpQE">Albert Rapp video and related links</a> can help to start.</p></li>
+</ul>
+</section>
+<section id="content-organization" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="content-organization"><span class="header-section-number">3.2</span> Content organization</h3>
+<p>Currently, the <span class="tm">GENODESY</span> website is organized in the following four main parts. As this site is pretty new, it will hopefully grow and evolve.</p>
+<ul>
+<li><p><strong>Home</strong>: this part is empty for the moment. My intend is to point to the different contents and resources offered on this site.</p></li>
+<li><p><strong>Services</strong>: applications, databases or APIs made available on this site.</p></li>
+<li><p><strong>Author</strong>: who I am and what I’ve done.</p></li>
+<li><p><strong>Blog</strong>: standalone topics addressing more or less technical issues or experiences. I moved this blog on my personal website which, I think, is more relevant.</p></li>
+</ul>
+</section>
+</section>
+<section id="other-services" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="other-services"><span class="header-section-number">4</span> Other services</h2>
+<p>One of the advantages of using a reverse proxy such as <a href="https://nginx.org/en/">NGINX</a> is that we can focus on services installation without having to worry too much about how to secure their access. I’ve shown above how I configured NGINX to provide an access to a Neo4j API and to Shiny applications through SSL encryption. The paragraphs below explain how the services themselves were installed and can be used.</p>
+<section id="bed-neo4j-database" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="bed-neo4j-database"><span class="header-section-number">4.1</span> BED Neo4j database</h3>
+<p><a href="https://patzaw.github.io/BED/">BED</a> (Biological Entity Dictionary) is an R package to get and explore mapping between identifiers of biological entities (BE). It relies on a <a href="https://neo4j.com/">Neo4j</a> database in which the relationships between the identifiers from different sources are recorded. I made an instance of the BED Neo4j database available on this server to allow people to easily test the package and its capabilities.</p>
+<p>The BED Neo4j database was installed as <a href="https://www.docker.com/">docker</a> container, using the <a href="https://github.com/patzaw/BED/blob/master/supp/Build/S05-BED-Container.sh"><code>S05-BED-Container.sh</code> script</a>.</p>
+<p>The access to the 5454 port is denied by the firewall, but NGINX provides a secure access to this resource via this path: <code>https://genodesy.org/BED/</code>. Therefore, external users can connect to the BED database in R as follows:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(BED)</span>
+<span id="cb3-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">connectToBed</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">url=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://genodesy.org/BED/"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>https://genodesy.org/BED/</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>BED</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>UCB-Human</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2024.01.14</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Cache OFF</code></pre>
+</div>
+</div>
+</section>
+<section id="shiny-server" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="shiny-server"><span class="header-section-number">4.2</span> Shiny server</h3>
+<p><a href="https://shiny.rstudio.com/">Shiny</a> is an R package to build interactive web apps straight from R. These apps can be easily deployed on services such as <a href="https://www.shinyapps.io/">shinyapps.io</a>. It is also possible to host them within a Shiny Server instance.</p>
+<p>The Shiny Server was simply installed following the instructions provided in the <a href="https://docs.rstudio.com/shiny-server/">official administrator’s guide</a>.</p>
+<p>Again, the access to the 5454 port is denied by the firewall, but NGINX provides a secure access to this resource via this path: <code>https://genodesy.org/shiny/</code>. Here is an example of a Shiny app hosted on <em>genodesy.org</em> : <a href="https://genodesy.org/shiny/ReDaMoR">https://genodesy.org/shiny/ReDaMoR</a>.</p>
+</section>
+</section>
+<section id="license" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="license"><span class="header-section-number">5</span> License</h2>
+<p>I chose to release the content of this website under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>infrastructure</category>
+  <guid>https://patzaw.github.io/posts/creating-website.html</guid>
+  <pubDate>Tue, 01 Nov 2022 23:00:00 GMT</pubDate>
+  <media:content url="https://patzaw.github.io/posts/images/Build-website.jpg" medium="image" type="image/jpeg"/>
+</item>
+</channel>
+</rss>
