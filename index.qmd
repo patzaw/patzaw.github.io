@@ -22,7 +22,7 @@ about:
       href: mailto:patrice.godard@gmail.com
 ---
 
-Hello! I'm a data scientist and bioinformatician at [UCB](https://ucb.com), a multinational biopharmaceutical company. I have strong experience in multiomics data analysis applied to therapeutic research. I mainly rely on the [R programming language](https://www.r-project.org/) for which I have developed several libraries.
+Hello! I'm a data scientist and bioinformatician at [Angelini Pharma](https://www.angelinipharma.com/), a international pharmaceutical company. I have strong experience in multiomics data analysis applied to therapeutic research. I mainly rely on the [R programming language](https://www.r-project.org/) for which I have developed several libraries.
 
 ::: columns
 ::: {.column style="width:47%; padding-right:2px;"}
