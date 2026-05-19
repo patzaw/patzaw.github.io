@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Patrice Godard">
+<meta name="dcterms.date" content="2026-05-19">
+<meta name="description" content="A walkthrough of neo2R 3.0.0’s new Aura support and httr2 backend, using the classic movie recommendations database.">
+
+<title>Querying Neo4j Aura from R with neo2R – Patrice Godard</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-9c79f1c896d85caf6a9db2bd69d4123f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-7RG3ZVT8WZ"></script>
+
+<script type="text/plain" cookie-consent="tracking">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-7RG3ZVT8WZ', { 'anonymize_ip': true});
+</script>
+
+<script type="text/javascript" charset="UTF-8">
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({
+  "notice_banner_type":"headline",
+  "consent_type":"implied",
+  "palette":"light",
+  "language":"en",
+  "page_load_consent_levels":["strictly-necessary","functionality","tracking","targeting"],
+  "notice_banner_reject_button_hide":false,
+  "preferences_center_close_button_hide":false,
+  "website_name":""
+  ,
+"language":"en"
+  });
+});
+</script> 
+  
+<style>html{ scroll-behavior: smooth; }</style>
+<link href="../site_libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+<script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="../site_libs/vis-9.1.0/vis-network.min.css" rel="stylesheet">
+<script src="../site_libs/vis-9.1.0/vis-network.min.js"></script>
+<script src="../site_libs/visNetwork-binding-2.1.4/visNetwork.js"></script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Querying Neo4j Aura from R with neo2R – Patrice Godard">
+<meta property="og:description" content="A walkthrough of neo2R 3.0.0’s new Aura support and httr2 backend, using the classic movie recommendations database.">
+<meta property="og:image" content="https://patzaw.github.io/posts/images/bscui.png">
+<meta property="og:site_name" content="Patrice Godard">
+<meta property="og:image:height" content="488">
+<meta property="og:image:width" content="432">
+<meta name="twitter:title" content="Querying Neo4j Aura from R with neo2R – Patrice Godard">
+<meta name="twitter:description" content="A walkthrough of neo2R 3.0.0’s new Aura support and httr2 backend, using the classic movie recommendations database.">
+<meta name="twitter:image" content="https://patzaw.github.io/posts/images/bscui.png">
+<meta name="twitter:creator" content="@PatriceGodard">
+<meta name="twitter:image-height" content="488">
+<meta name="twitter:image-width" content="432">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Patrice Godard</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://genodesy.org"> 
+<span class="menu-text">GENODESY</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../tools.html"> 
+<span class="menu-text">Tools</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-more" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">More</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-more">    
+        <li>
+    <a class="dropdown-item" href="../blogroll.html">
+ <span class="dropdown-text">Blogroll</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item compact">
+    <a class="nav-link" href="../blog.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites"><span class="header-section-number">2</span> Prerequisites</a></li>
+  <li><a href="#connecting-to-neo4j-aura" id="toc-connecting-to-neo4j-aura" class="nav-link" data-scroll-target="#connecting-to-neo4j-aura"><span class="header-section-number">3</span> Connecting to Neo4j Aura</a>
+  <ul class="collapse">
+  <li><a href="#create-and-connect-to-an-aura-instance" id="toc-create-and-connect-to-an-aura-instance" class="nav-link" data-scroll-target="#create-and-connect-to-an-aura-instance"><span class="header-section-number">3.1</span> Create and Connect to an Aura Instance</a></li>
+  <li><a href="#the-movie-recommendations-dataset" id="toc-the-movie-recommendations-dataset" class="nav-link" data-scroll-target="#the-movie-recommendations-dataset"><span class="header-section-number">3.2</span> The Movie Recommendations Dataset</a></li>
+  </ul></li>
+  <li><a href="#exploring-the-schema" id="toc-exploring-the-schema" class="nav-link" data-scroll-target="#exploring-the-schema"><span class="header-section-number">4</span> Exploring the schema</a></li>
+  <li><a href="#querying-with-cypher" id="toc-querying-with-cypher" class="nav-link" data-scroll-target="#querying-with-cypher"><span class="header-section-number">5</span> Querying with Cypher</a>
+  <ul class="collapse">
+  <li><a href="#top-prolific-actors" id="toc-top-prolific-actors" class="nav-link" data-scroll-target="#top-prolific-actors"><span class="header-section-number">5.1</span> Top prolific actors</a></li>
+  <li><a href="#movies-and-their-directors" id="toc-movies-and-their-directors" class="nav-link" data-scroll-target="#movies-and-their-directors"><span class="header-section-number">5.2</span> Movies and their directors</a></li>
+  <li><a href="#parameterised-queries" id="toc-parameterised-queries" class="nav-link" data-scroll-target="#parameterised-queries"><span class="header-section-number">5.3</span> Parameterised queries</a></li>
+  </ul></li>
+  <li><a href="#network-visualisation-with-visnetwork" id="toc-network-visualisation-with-visnetwork" class="nav-link" data-scroll-target="#network-visualisation-with-visnetwork"><span class="header-section-number">6</span> Network visualisation with visNetwork</a>
+  <ul class="collapse">
+  <li><a href="#step-1-fetch-nodes-and-edges" id="toc-step-1-fetch-nodes-and-edges" class="nav-link" data-scroll-target="#step-1-fetch-nodes-and-edges"><span class="header-section-number">6.1</span> Step 1 — Fetch nodes and edges</a></li>
+  <li><a href="#step-2-shape-data-for-visnetwork" id="toc-step-2-shape-data-for-visnetwork" class="nav-link" data-scroll-target="#step-2-shape-data-for-visnetwork"><span class="header-section-number">6.2</span> Step 2 — Shape data for visNetwork</a></li>
+  <li><a href="#step-3-draw-the-network" id="toc-step-3-draw-the-network" class="nav-link" data-scroll-target="#step-3-draw-the-network"><span class="header-section-number">6.3</span> Step 3 — Draw the network</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7</span> Conclusion</a>
+  <ul class="collapse">
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">7.1</span> Further reading</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Querying Neo4j Aura from R with neo2R</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Neo4j</div>
+    <div class="quarto-category">Graph Databases</div>
+    <div class="quarto-category">Network Analysis</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    A walkthrough of neo2R 3.0.0’s new Aura support and httr2 backend, using the classic movie recommendations database.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Patrice Godard </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 19, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="https://patzaw.github.io/site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link rel="stylesheet" href="https://patzaw.github.io/site_libs/vis-9.1.0/vis-network.min.css">
+<script src="https://patzaw.github.io/site_libs/vis-9.1.0/vis-network.min.js"></script>
+<script src="https://patzaw.github.io/site_libs/visNetwork-binding-2.1.4/visNetwork.js"></script>
+<p><img src="images/neo2R-Aura.png" class="img-fluid" alt="Illustration of neo2R used to connect to Aura, generated with Gemini" width="800"></p>
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>Graph databases excel at storing and traversing highly connected data used for recommendation engines, fraud detection, knowledge graphs, and social networks. <strong>Neo4j</strong> is one of the most widely used graph databases, and with <strong>Neo4j Aura</strong>, its managed cloud service now makes it easy to spin up a production-grade instance without any infrastructure overhead.</p>
+<p>On the R side, the <a href="https://cran.r-project.org/package=neo2R">neo2R</a> package has long been available for querying self-hosted Neo4j instances from R. Version <strong>3.0.0</strong> brings two important changes:</p>
+<ol type="1">
+<li><strong>Unified connection model</strong> — a single <code>startGraph()</code> call handles both a self-hosted Neo4j instance (<code>http://localhost:7474</code>) and a <em>cloud</em> Neo4j Aura instance (<code>https://&lt;id&gt;.databases.neo4j.io</code>).</li>
+<li><strong>httr2 backend</strong> — the internal HTTP layer migrated from the deprecated <code>httr</code> package to <a href="https://httr2.r-lib.org/"><code>httr2</code></a>.</li>
+</ol>
+<p>In this post, we’ll connect to the <strong>free Neo4j Aura demo database</strong> preloaded with the classic Movie Recommendations dataset, explore the graph with Cypher queries, and finish with an interactive network visualization built with <a href="https://datastorm-open.github.io/visNetwork/">visNetwork</a>.</p>
+<hr>
+</section>
+<section id="prerequisites" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="prerequisites"><span class="header-section-number">2</span> Prerequisites</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"neo2R"</span>, <span class="st">"dplyr"</span>, <span class="st">"visNetwork"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(neo2R)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(visNetwork)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>neo2R 3.0.0 requires R ≥ 4.1 and httr2 ≥ 1.0.0. Check your versions with <code>packageVersion("neo2R")</code> and <code>packageVersion("httr2")</code>.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="connecting-to-neo4j-aura" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="connecting-to-neo4j-aura"><span class="header-section-number">3</span> Connecting to Neo4j Aura</h2>
+<section id="create-and-connect-to-an-aura-instance" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="create-and-connect-to-an-aura-instance"><span class="header-section-number">3.1</span> Create and Connect to an Aura Instance</h3>
+<p>Neo4j provides a <strong>free Aura Free</strong> tier (up to 200 k nodes / 400 k relationships).</p>
+<p>Create a free instance at https://console.neo4j.io and get your connection details.</p>
+<p>Connect to your instance with <code>startGraph()</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>my_aura <span class="ot">&lt;-</span> <span class="fu">startGraph</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">url =</span> <span class="st">"https://&lt;INSTANCEID&gt;.databases.neo4j.io"</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">database =</span> <span class="st">"INSTANCEID"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">username =</span> <span class="st">"INSTANCEID"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">password =</span> <span class="st">"INSTANCEPASSWORD"</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="do">## api = "v2" is set automatically for *.databases.neo4j.io URLs</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="the-movie-recommendations-dataset" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="the-movie-recommendations-dataset"><span class="header-section-number">3.2</span> The Movie Recommendations Dataset</h3>
+<p>Neo4j provides <a href="https://neo4j.com/docs/getting-started/appendix/example-data/">example datasets</a>, and most of them are available as a one-click templates in the <a href="https://console.neo4j.io">Neo4j Aura console</a>.</p>
+<p>The <a href="https://github.com/neo4j-graph-examples/recommendations">Movie Recommendations dataset</a> is a graph example using a dataset of movie reviews for generating personalized, real-time recommendations. This dataset is also available on a demo server that can be accessed as follows.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>graph <span class="ot">&lt;-</span> <span class="fu">startGraph</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">url =</span> <span class="st">"https://demo.neo4jlabs.com:7473"</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">database =</span> <span class="st">"recommendations"</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">username =</span> <span class="st">"recommendations"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">password =</span> <span class="st">"recommendations"</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="exploring-the-schema" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="exploring-the-schema"><span class="header-section-number">4</span> Exploring the schema</h2>
+<p>The Movie database contains the following node labels and relationship types:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Node label</th>
+<th style="text-align: left;">Key properties</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Movie</td>
+<td style="text-align: left;">title, released, imdbId</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Genre</td>
+<td style="text-align: left;">name</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Actor</td>
+<td style="text-align: left;">name, born, imdbId</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Director</td>
+<td style="text-align: left;">name, born, imdbId</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">User</td>
+<td style="text-align: left;">name</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><br></p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Relationship type</th>
+<th style="text-align: left;">Key properties</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">IN_GENRE</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ACTED_IN</td>
+<td style="text-align: left;">role</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DIRECTED</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">RATED</td>
+<td style="text-align: left;">rating || timestamp</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><br></p>
+<p>Let’s count the number of these different concepts:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Node types and counts</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cypher</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  graph,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">  MATCH (n)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="st">  RETURN labels(n) AS label, count(n) AS n</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY n DESC</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="do">## filtering out technical nodes</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(label <span class="sc">%notin%</span> <span class="fu">c</span>(<span class="st">"_Bloom_Perspective_"</span>, <span class="st">"_Bloom_Scene_"</span>, <span class="st">""</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  label                           n
+  &lt;chr&gt;                       &lt;int&gt;
+1 Actor || Person             14956
+2 Movie                        9125
+3 Director || Person           3604
+4 User                          671
+5 Actor || Director || Person   487
+6 Genre                          20</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Relationship types and counts</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cypher</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  graph,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="st">  MATCH ()-[r]-&gt;()</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="st">  RETURN type(r) AS type, count(r) AS n</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY n DESC</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="do">## filtering out technical relationships</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(type <span class="sc">%notin%</span> <span class="fu">c</span>(<span class="st">"_Bloom_HAS_SCENE_"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 2
+  type          n
+  &lt;chr&gt;     &lt;int&gt;
+1 RATED    100004
+2 ACTED_IN  35910
+3 IN_GENRE  20340
+4 DIRECTED  10007</code></pre>
+</div>
+</div>
+</section>
+<section id="querying-with-cypher" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="querying-with-cypher"><span class="header-section-number">5</span> Querying with Cypher</h2>
+<section id="top-prolific-actors" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="top-prolific-actors"><span class="header-section-number">5.1</span> Top prolific actors</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cypher</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  graph,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st">  MATCH (p:Person)-[:ACTED_IN]-&gt;(m:Movie)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="st">  RETURN p.name AS actor, count(m) AS movies</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY movies DESC</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="st">  LIMIT 10</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+   actor             movies
+   &lt;chr&gt;              &lt;int&gt;
+ 1 Robert De Niro        56
+ 2 Bruce Willis          49
+ 3 Samuel L. Jackson     45
+ 4 Nicolas Cage          45
+ 5 Michael Caine         40
+ 6 Clint Eastwood        40
+ 7 Tom Hanks             38
+ 8 John Cusack           38
+ 9 Morgan Freeman        38
+10 Gene Hackman          38</code></pre>
+</div>
+</div>
+</section>
+<section id="movies-and-their-directors" class="level3" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="movies-and-their-directors"><span class="header-section-number">5.2</span> Movies and their directors</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cypher</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  graph,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="st">  MATCH (d:Person)-[:DIRECTED]-&gt;(m:Movie)</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="st">  RETURN m.title AS movie, m.released as released, d.name AS director</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY m.released IS NOT NULL DESC, m.released DESC</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="st">  LIMIT 10</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="st">"</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 3
+   movie         released   director            
+   &lt;chr&gt;         &lt;chr&gt;      &lt;chr&gt;               
+ 1 Solace        2016-09-02 "Afonso Poyart"     
+ 2 Ben-hur       2016-08-12 "Timur Bekmambetov" 
+ 3 Rustom        2016-08-12 "Tinu Suresh Desai" 
+ 4 Mohenjo Daro  2016-08-12 "Ashutosh Gowariker"
+ 5 Suicide Squad 2016-08-05 "David Ayer"        
+ 6 Shin Godzilla 2016-07-29 "Hideaki Anno"      
+ 7 Shin Godzilla 2016-07-29 " Shinji Higuchi"   
+ 8 Jason Bourne  2016-07-29 "Paul Greengrass"   
+ 9 Star Trek 3   2016-07-22 "Justin Lin"        
+10 Ghostbusters  2016-07-15 "Paul Feig"         </code></pre>
+</div>
+</div>
+</section>
+<section id="parameterised-queries" class="level3" data-number="5.3">
+<h3 data-number="5.3" class="anchored" data-anchor-id="parameterised-queries"><span class="header-section-number">5.3</span> Parameterised queries</h3>
+<p>neo2R supports <strong>named parameters</strong>, keeping queries safe from injection and easy to reuse:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Find all co-stars of a given actor</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cypher</span>(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  graph,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="st">  MATCH (a:Person {name: $actor})-[:ACTED_IN]-&gt;(m:Movie)&lt;-[:ACTED_IN]-(co:Person)</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="st">  RETURN DISTINCT co.name AS co_star, m.title AS shared_movie</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY co_star</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="st">  "</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters =</span> <span class="fu">list</span>(<span class="at">actor =</span> <span class="st">"Tom Hanks"</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 114 × 2
+   co_star            shared_movie        
+   &lt;chr&gt;              &lt;chr&gt;               
+ 1 Adrian Zmed        Bachelor Party      
+ 2 Alexander Godunov  Money Pit, The      
+ 3 Amy Adams          Charlie Wilson's War
+ 4 Annie Rose Buckley Saving Mr. Banks    
+ 5 Audrey Tautou      Da Vinci Code, The  
+ 6 Ayelet Zurer       Angels &amp; Demons     
+ 7 Barkhad Abdi       Captain Phillips    
+ 8 Barkhad Abdirahman Captain Phillips    
+ 9 Barry Pepper       Saving Private Ryan 
+10 Bill Paxton        Apollo 13           
+# ℹ 104 more rows</code></pre>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="network-visualisation-with-visnetwork" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="network-visualisation-with-visnetwork"><span class="header-section-number">6</span> Network visualisation with visNetwork</h2>
+<p>The real power of a graph database is visible when you <em>draw</em> the graph. Let’s pull Tom Hanks’s ego network, everyone he has acted alongside, and render it with <strong>visNetwork</strong>.</p>
+<section id="step-1-fetch-nodes-and-edges" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="step-1-fetch-nodes-and-edges"><span class="header-section-number">6.1</span> Step 1 — Fetch nodes and edges</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Tom Hanks, his movies, and his co-stars</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>hub <span class="ot">&lt;-</span> <span class="st">"Tom Hanks"</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>nodes_raw <span class="ot">&lt;-</span> <span class="fu">cypher</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  graph,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="st">  MATCH (hub:Person {name: $hub})-[hr:ACTED_IN]-&gt;(m:Movie)</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="st">  &lt;-[cr:ACTED_IN]-(co:Person)</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="st">  RETURN hub.name AS hub, hr.role AS hub_role,</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="st">  m.title AS movie, m.year AS year,</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="st">  co.name AS co, cr.role AS co_role</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="st">  "</span>,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters =</span> <span class="fu">list</span>(<span class="at">hub =</span> hub)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="step-2-shape-data-for-visnetwork" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="step-2-shape-data-for-visnetwork"><span class="header-section-number">6.2</span> Step 2 — Shape data for visNetwork</h3>
+<p>visNetwork expects two data frames: <code>nodes (with columns</code>id<code>,</code>label<code>,</code>group<code>, …) and</code>edges<code>(with columns</code>from<code>,</code>to`, …).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>nodes <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  nodes_raw <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">id =</span> hub,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> <span class="st">"Hub"</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  nodes_raw <span class="sc">|&gt;</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>(</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">id =</span> co,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> <span class="st">"Co-star"</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  nodes_raw <span class="sc">|&gt;</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>(</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">id =</span> movie,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> <span class="st">"Movie"</span>,</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>      year</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">|&gt;</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">sprintf</span>(</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>      <span class="st">'&lt;b&gt;%s&lt;/b&gt;: %s%s'</span>,</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>      group,</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>      id,</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(year), <span class="fu">sprintf</span>(<span class="st">"(%s)"</span>, year), <span class="st">""</span>)</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape =</span> <span class="fu">ifelse</span>(group <span class="sc">==</span> <span class="st">"Movie"</span>, <span class="st">"dot"</span>, <span class="st">"star"</span>),</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="fu">ifelse</span>(group <span class="sc">==</span> <span class="st">"Hub"</span>, <span class="dv">30</span>, <span class="dv">18</span>)</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(id)</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>edges <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>  nodes_raw <span class="sc">|&gt;</span></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>(</span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>      <span class="at">from =</span> hub,</span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">to =</span> movie,</span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">role =</span> hub_role</span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>  nodes_raw <span class="sc">|&gt;</span></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>(</span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">from =</span> co,</span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>      <span class="at">to =</span> movie,</span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>      <span class="at">role =</span> co_role</span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">sprintf</span>(<span class="st">'&lt;b&gt;Role&lt;/b&gt;: %s'</span>, role),</span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">arrows =</span> <span class="st">"to"</span></span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="step-3-draw-the-network" class="level3" data-number="6.3">
+<h3 data-number="6.3" class="anchored" data-anchor-id="step-3-draw-the-network"><span class="header-section-number">6.3</span> Step 3 — Draw the network</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">visNetwork</span>(nodes, edges) <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">visGroups</span>(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">groupname =</span> <span class="st">"hub"</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="fu">list</span>(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">background =</span> <span class="st">"#3B82F6"</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">border =</span> <span class="st">"#1D4ED8"</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">highlight =</span> <span class="st">"#93C5FD"</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">visGroups</span>(</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">groupname =</span> <span class="st">"movie"</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="fu">list</span>(</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">background =</span> <span class="st">"#F97316"</span>,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">border =</span> <span class="st">"#C2410C"</span>,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">highlight =</span> <span class="st">"#FED7AA"</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape =</span> <span class="st">"square"</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">visGroups</span>(</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">groupname =</span> <span class="st">"costar"</span>,</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="fu">list</span>(</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">background =</span> <span class="st">"#6B7280"</span>,</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">border =</span> <span class="st">"#374151"</span>,</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">highlight =</span> <span class="st">"#D1D5DB"</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">visEdges</span>(</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">"#CBD5E1"</span>, <span class="at">highlight =</span> <span class="st">"#3B82F6"</span>),</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="fl">1.5</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">visOptions</span>(</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">highlightNearest =</span> <span class="fu">list</span>(<span class="at">enabled =</span> <span class="cn">TRUE</span>, <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">hover =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">nodesIdSelection =</span> <span class="cn">TRUE</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">visLayout</span>(<span class="at">randomSeed =</span> <span class="dv">42</span>) <span class="sc">|&gt;</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">visPhysics</span>(</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">solver =</span> <span class="st">"forceAtlas2Based"</span>,</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">forceAtlas2Based =</span> <span class="fu">list</span>(</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">gravitationalConstant =</span> <span class="sc">-</span><span class="dv">60</span>,</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">springLength =</span> <span class="dv">120</span>,</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">springConstant =</span> <span class="fl">0.04</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">visLegend</span>(<span class="at">position =</span> <span class="st">"right"</span>, <span class="at">main =</span> <span class="st">"Node type"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="visNetwork html-widget html-fill-item" id="htmlwidget-c24f3f149533cdd51081" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-c24f3f149533cdd51081">{"x":{"nodes":{"id":["'burbs, The","Adrian Zmed","Alexander Godunov","Amy Adams","Angels & Demons","Annie Rose Buckley","Apollo 13","Audrey Tautou","Ayelet Zurer","Bachelor Party","Barkhad Abdi","Barkhad Abdirahman","Barry Pepper","Big","Bill Paxton","Bonfire of the Vanities","Bonnie Hunt","Bruce Dern","Bruce Willis","Buzz Kilman","Captain Phillips","Carl Weathers","Carrie Fisher","Catch Me If You Can","Catherine Keener","Catherine Zeta-Jones","Charles Durning","Charlie Wilson's War","Chi McBride","Christopher Plummer","Christopher Walken","Cloud Atlas","Colin Farrell","Craig T. Nelson","Da Vinci Code, The","Dabney Coleman","Dan Aykroyd","Daryl Hannah","David Andrews","David Morse","Denzel Washington","Don Rickles","Dragnet","Eddie Deezen","Edward Burns","Elizabeth Perkins","Emma Thompson","Eugene Levy","Eva Marie Saint","Ewan McGregor","Extremely Loud and Incredibly Close","Forrest Gump","From the Earth to the Moon","Gary Sinise","Geena Davis","George Grizzard","Green Mile, The","Greg Kinnear","Halle Berry","Harry Morgan","Hector Elizondo","Hugo Weaving","Ian McKellen","Irma P. Hall","J.K. Simmons","Jackie Gleason","Jean Reno","Jim Broadbent","Jim Varney","Joan Cusack","Joe Versus the Volcano","John Candy","John Goodman","John Heard","Julia Roberts","Kelsey Grammer","Kevin Bacon","Kim Cattrall","Ladykillers, The","Lane Smith","Larry Crowne","League of Their Own, A","Leonardo DiCaprio","Leslie Zemeckis","Lloyd Bridges","Lori Petty","Lori Singer","Madonna","Man with One Red Shoe, The","Mare Winningham","Mark Rydell","Marlon Wayans","Martin Sheen","Maureen Stapleton","Meg Ryan","Melanie Griffith","Michael Clarke Duncan","Michael Conner Humphreys","Money Pit, The","Ned Beatty","Nick Searcy","Nona Gaye","Nothing in Common","Parker Posey","Philadelphia","Philip Seymour Hoffman","Polar Express, The","Punchline","Randall Park","Reginald VelJohnson","Rick Ducommun","Rita Wilson","Robert Loggia","Robert Stack","Roberta Maxwell","Robin Wright","Ross Malinger","Roxana Ortega","Sally Field","Sandra Bullock","Sarah Mahoney","Saving Mr. Banks","Saving Private Ryan","Shelley Long","Sleepless in Seattle","Splash","Stanley Tucci","Stellan Skarsgård","Tawny Kitaen","Terminal, The","Thomas Horn","Tim Allen","Tim Thomerson","Tom Hanks","Tom Sizemore","Toy Story","Toy Story 2","Toy Story 3","Toy Story of Terror","Turner & Hooch","Victor Garber","Volunteers","You've Got Mail","Zoe Caldwell"],"group":["Movie","Co-star","Co-star","Co-star","Movie","Co-star","Movie","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Movie","Co-star","Movie","Co-star","Co-star","Co-star","Co-star","Movie","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Movie","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Movie","Movie","Movie","Co-star","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Movie","Co-star","Movie","Movie","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Movie","Co-star","Movie","Co-star","Movie","Movie","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Co-star","Movie","Movie","Co-star","Movie","Movie","Co-star","Co-star","Co-star","Movie","Co-star","Co-star","Co-star","Hub","Co-star","Movie","Movie","Movie","Movie","Movie","Co-star","Movie","Movie","Co-star"],"year":[1989,null,null,null,2009,null,1995,null,null,1984,null,null,null,1988,null,1990,null,null,null,null,2013,null,null,2002,null,null,null,2007,null,null,null,2012,null,null,2006,null,null,null,null,null,null,null,1987,null,null,null,null,null,null,null,2011,1994,1998,null,null,null,1999,null,null,null,null,null,null,null,null,null,null,null,null,null,1990,null,null,null,null,null,null,null,2004,null,2011,1992,null,null,null,null,null,null,1985,null,null,null,null,null,null,null,null,null,1986,null,null,null,1986,null,1993,null,2004,1988,null,null,null,null,null,null,null,null,null,null,null,null,null,2013,1998,null,1993,1984,null,null,null,2004,null,null,null,null,null,1995,1999,2010,2013,1989,null,1985,1998,null],"title":["<b>Movie<\/b>: 'burbs, The(1989)","<b>Co-star<\/b>: Adrian Zmed","<b>Co-star<\/b>: Alexander Godunov","<b>Co-star<\/b>: Amy Adams","<b>Movie<\/b>: Angels & Demons(2009)","<b>Co-star<\/b>: Annie Rose Buckley","<b>Movie<\/b>: Apollo 13(1995)","<b>Co-star<\/b>: Audrey Tautou","<b>Co-star<\/b>: Ayelet Zurer","<b>Movie<\/b>: Bachelor Party(1984)","<b>Co-star<\/b>: Barkhad Abdi","<b>Co-star<\/b>: Barkhad Abdirahman","<b>Co-star<\/b>: Barry Pepper","<b>Movie<\/b>: Big(1988)","<b>Co-star<\/b>: Bill Paxton","<b>Movie<\/b>: Bonfire of the Vanities(1990)","<b>Co-star<\/b>: Bonnie Hunt","<b>Co-star<\/b>: Bruce Dern","<b>Co-star<\/b>: Bruce Willis","<b>Co-star<\/b>: Buzz Kilman","<b>Movie<\/b>: Captain Phillips(2013)","<b>Co-star<\/b>: Carl Weathers","<b>Co-star<\/b>: Carrie Fisher","<b>Movie<\/b>: Catch Me If You Can(2002)","<b>Co-star<\/b>: Catherine Keener","<b>Co-star<\/b>: Catherine Zeta-Jones","<b>Co-star<\/b>: Charles Durning","<b>Movie<\/b>: Charlie Wilson's War(2007)","<b>Co-star<\/b>: Chi McBride","<b>Co-star<\/b>: Christopher Plummer","<b>Co-star<\/b>: Christopher Walken","<b>Movie<\/b>: Cloud Atlas(2012)","<b>Co-star<\/b>: Colin Farrell","<b>Co-star<\/b>: Craig T. Nelson","<b>Movie<\/b>: Da Vinci Code, The(2006)","<b>Co-star<\/b>: Dabney Coleman","<b>Co-star<\/b>: Dan Aykroyd","<b>Co-star<\/b>: Daryl Hannah","<b>Co-star<\/b>: David Andrews","<b>Co-star<\/b>: David Morse","<b>Co-star<\/b>: Denzel Washington","<b>Co-star<\/b>: Don Rickles","<b>Movie<\/b>: Dragnet(1987)","<b>Co-star<\/b>: Eddie Deezen","<b>Co-star<\/b>: Edward Burns","<b>Co-star<\/b>: Elizabeth Perkins","<b>Co-star<\/b>: Emma Thompson","<b>Co-star<\/b>: Eugene Levy","<b>Co-star<\/b>: Eva Marie Saint","<b>Co-star<\/b>: Ewan McGregor","<b>Movie<\/b>: Extremely Loud and Incredibly Close(2011)","<b>Movie<\/b>: Forrest Gump(1994)","<b>Movie<\/b>: From the Earth to the Moon(1998)","<b>Co-star<\/b>: Gary Sinise","<b>Co-star<\/b>: Geena Davis","<b>Co-star<\/b>: George Grizzard","<b>Movie<\/b>: Green Mile, The(1999)","<b>Co-star<\/b>: Greg Kinnear","<b>Co-star<\/b>: Halle Berry","<b>Co-star<\/b>: Harry Morgan","<b>Co-star<\/b>: Hector Elizondo","<b>Co-star<\/b>: Hugo Weaving","<b>Co-star<\/b>: Ian McKellen","<b>Co-star<\/b>: Irma P. Hall","<b>Co-star<\/b>: J.K. Simmons","<b>Co-star<\/b>: Jackie Gleason","<b>Co-star<\/b>: Jean Reno","<b>Co-star<\/b>: Jim Broadbent","<b>Co-star<\/b>: Jim Varney","<b>Co-star<\/b>: Joan Cusack","<b>Movie<\/b>: Joe Versus the Volcano(1990)","<b>Co-star<\/b>: John Candy","<b>Co-star<\/b>: John Goodman","<b>Co-star<\/b>: John Heard","<b>Co-star<\/b>: Julia Roberts","<b>Co-star<\/b>: Kelsey Grammer","<b>Co-star<\/b>: Kevin Bacon","<b>Co-star<\/b>: Kim Cattrall","<b>Movie<\/b>: Ladykillers, The(2004)","<b>Co-star<\/b>: Lane Smith","<b>Movie<\/b>: Larry Crowne(2011)","<b>Movie<\/b>: League of Their Own, A(1992)","<b>Co-star<\/b>: Leonardo DiCaprio","<b>Co-star<\/b>: Leslie Zemeckis","<b>Co-star<\/b>: Lloyd Bridges","<b>Co-star<\/b>: Lori Petty","<b>Co-star<\/b>: Lori Singer","<b>Co-star<\/b>: Madonna","<b>Movie<\/b>: Man with One Red Shoe, The(1985)","<b>Co-star<\/b>: Mare Winningham","<b>Co-star<\/b>: Mark Rydell","<b>Co-star<\/b>: Marlon Wayans","<b>Co-star<\/b>: Martin Sheen","<b>Co-star<\/b>: Maureen Stapleton","<b>Co-star<\/b>: Meg Ryan","<b>Co-star<\/b>: Melanie Griffith","<b>Co-star<\/b>: Michael Clarke Duncan","<b>Co-star<\/b>: Michael Conner Humphreys","<b>Movie<\/b>: Money Pit, The(1986)","<b>Co-star<\/b>: Ned Beatty","<b>Co-star<\/b>: Nick Searcy","<b>Co-star<\/b>: Nona Gaye","<b>Movie<\/b>: Nothing in Common(1986)","<b>Co-star<\/b>: Parker Posey","<b>Movie<\/b>: Philadelphia(1993)","<b>Co-star<\/b>: Philip Seymour Hoffman","<b>Movie<\/b>: Polar Express, The(2004)","<b>Movie<\/b>: Punchline(1988)","<b>Co-star<\/b>: Randall Park","<b>Co-star<\/b>: Reginald VelJohnson","<b>Co-star<\/b>: Rick Ducommun","<b>Co-star<\/b>: Rita Wilson","<b>Co-star<\/b>: Robert Loggia","<b>Co-star<\/b>: Robert Stack","<b>Co-star<\/b>: Roberta Maxwell","<b>Co-star<\/b>: Robin Wright","<b>Co-star<\/b>: Ross Malinger","<b>Co-star<\/b>: Roxana Ortega","<b>Co-star<\/b>: Sally Field","<b>Co-star<\/b>: Sandra Bullock","<b>Co-star<\/b>: Sarah Mahoney","<b>Movie<\/b>: Saving Mr. Banks(2013)","<b>Movie<\/b>: Saving Private Ryan(1998)","<b>Co-star<\/b>: Shelley Long","<b>Movie<\/b>: Sleepless in Seattle(1993)","<b>Movie<\/b>: Splash(1984)","<b>Co-star<\/b>: Stanley Tucci","<b>Co-star<\/b>: Stellan Skarsgård","<b>Co-star<\/b>: Tawny Kitaen","<b>Movie<\/b>: Terminal, The(2004)","<b>Co-star<\/b>: Thomas Horn","<b>Co-star<\/b>: Tim Allen","<b>Co-star<\/b>: Tim Thomerson","<b>Hub<\/b>: Tom Hanks","<b>Co-star<\/b>: Tom Sizemore","<b>Movie<\/b>: Toy Story(1995)","<b>Movie<\/b>: Toy Story 2(1999)","<b>Movie<\/b>: Toy Story 3(2010)","<b>Movie<\/b>: Toy Story of Terror(2013)","<b>Movie<\/b>: Turner & Hooch(1989)","<b>Co-star<\/b>: Victor Garber","<b>Movie<\/b>: Volunteers(1985)","<b>Movie<\/b>: You've Got Mail(1998)","<b>Co-star<\/b>: Zoe Caldwell"],"shape":["dot","star","star","star","dot","star","dot","star","star","dot","star","star","star","dot","star","dot","star","star","star","star","dot","star","star","dot","star","star","star","dot","star","star","star","dot","star","star","dot","star","star","star","star","star","star","star","dot","star","star","star","star","star","star","star","dot","dot","dot","star","star","star","dot","star","star","star","star","star","star","star","star","star","star","star","star","star","dot","star","star","star","star","star","star","star","dot","star","dot","dot","star","star","star","star","star","star","dot","star","star","star","star","star","star","star","star","star","dot","star","star","star","dot","star","dot","star","dot","dot","star","star","star","star","star","star","star","star","star","star","star","star","star","dot","dot","star","dot","dot","star","star","star","dot","star","star","star","star","star","dot","dot","dot","dot","dot","star","dot","dot","star"],"size":[18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,30,18,18,18,18,18,18,18,18,18,18],"label":["'burbs, The","Adrian Zmed","Alexander Godunov","Amy Adams","Angels & Demons","Annie Rose Buckley","Apollo 13","Audrey Tautou","Ayelet Zurer","Bachelor Party","Barkhad Abdi","Barkhad Abdirahman","Barry Pepper","Big","Bill Paxton","Bonfire of the Vanities","Bonnie Hunt","Bruce Dern","Bruce Willis","Buzz Kilman","Captain Phillips","Carl Weathers","Carrie Fisher","Catch Me If You Can","Catherine Keener","Catherine Zeta-Jones","Charles Durning","Charlie Wilson's War","Chi McBride","Christopher Plummer","Christopher Walken","Cloud Atlas","Colin Farrell","Craig T. Nelson","Da Vinci Code, The","Dabney Coleman","Dan Aykroyd","Daryl Hannah","David Andrews","David Morse","Denzel Washington","Don Rickles","Dragnet","Eddie Deezen","Edward Burns","Elizabeth Perkins","Emma Thompson","Eugene Levy","Eva Marie Saint","Ewan McGregor","Extremely Loud and Incredibly Close","Forrest Gump","From the Earth to the Moon","Gary Sinise","Geena Davis","George Grizzard","Green Mile, The","Greg Kinnear","Halle Berry","Harry Morgan","Hector Elizondo","Hugo Weaving","Ian McKellen","Irma P. Hall","J.K. Simmons","Jackie Gleason","Jean Reno","Jim Broadbent","Jim Varney","Joan Cusack","Joe Versus the Volcano","John Candy","John Goodman","John Heard","Julia Roberts","Kelsey Grammer","Kevin Bacon","Kim Cattrall","Ladykillers, The","Lane Smith","Larry Crowne","League of Their Own, A","Leonardo DiCaprio","Leslie Zemeckis","Lloyd Bridges","Lori Petty","Lori Singer","Madonna","Man with One Red Shoe, The","Mare Winningham","Mark Rydell","Marlon Wayans","Martin Sheen","Maureen Stapleton","Meg Ryan","Melanie Griffith","Michael Clarke Duncan","Michael Conner Humphreys","Money Pit, The","Ned Beatty","Nick Searcy","Nona Gaye","Nothing in Common","Parker Posey","Philadelphia","Philip Seymour Hoffman","Polar Express, The","Punchline","Randall Park","Reginald VelJohnson","Rick Ducommun","Rita Wilson","Robert Loggia","Robert Stack","Roberta Maxwell","Robin Wright","Ross Malinger","Roxana Ortega","Sally Field","Sandra Bullock","Sarah Mahoney","Saving Mr. Banks","Saving Private Ryan","Shelley Long","Sleepless in Seattle","Splash","Stanley Tucci","Stellan Skarsgård","Tawny Kitaen","Terminal, The","Thomas Horn","Tim Allen","Tim Thomerson","Tom Hanks","Tom Sizemore","Toy Story","Toy Story 2","Toy Story 3","Toy Story of Terror","Turner & Hooch","Victor Garber","Volunteers","You've Got Mail","Zoe Caldwell"]},"edges":{"from":["Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Tom Hanks","Sally Field","Mark Rydell","John Goodman","Martin Sheen","Leonardo DiCaprio","Christopher Walken","Dan Aykroyd","Harry Morgan","Christopher Plummer","Colin Farrell","Emma Thompson","Annie Rose Buckley","Tawny Kitaen","Adrian Zmed","George Grizzard","Tim Thomerson","Rita Wilson","John Candy","Dabney Coleman","Lori Singer","Charles Durning","Eugene Levy","John Candy","Daryl Hannah","John Heard","Elizabeth Perkins","Robert Loggia","Hector Elizondo","Eva Marie Saint","Jackie Gleason","Alexander Godunov","Shelley Long","Maureen Stapleton","Tim Allen","Joan Cusack","Carl Weathers","Barkhad Abdirahman","Catherine Keener","Barkhad Abdi","Sarah Mahoney","Roxana Ortega","Randall Park","Hugo Weaving","Jim Broadbent","Halle Berry","Stellan Skarsgård","Ayelet Zurer","Ewan McGregor","Thomas Horn","Zoe Caldwell","Sandra Bullock","Amy Adams","Philip Seymour Hoffman","Julia Roberts","Tim Allen","Ned Beatty","Joan Cusack","David Andrews","Lane Smith","Nick Searcy","Bonnie Hunt","Michael Clarke Duncan","David Morse","Tom Sizemore","Edward Burns","Barry Pepper","Kelsey Grammer","Tim Allen","Joan Cusack","Bill Paxton","Kevin Bacon","Gary Sinise","Jim Varney","Tim Allen","Don Rickles","Geena Davis","Lori Petty","Madonna","Robin Wright","Sally Field","Michael Conner Humphreys","Roberta Maxwell","Denzel Washington","Buzz Kilman","Victor Garber","Rita Wilson","Ross Malinger","Craig T. Nelson","Reginald VelJohnson","Mare Winningham","Rick Ducommun","Carrie Fisher","Bruce Dern","Meg Ryan","Robert Stack","Lloyd Bridges","Bruce Willis","Melanie Griffith","Kim Cattrall","Catherine Zeta-Jones","Chi McBride","Stanley Tucci","Audrey Tautou","Jean Reno","Ian McKellen","Eddie Deezen","Leslie Zemeckis","Nona Gaye","Irma P. Hall","Marlon Wayans","J.K. Simmons","Meg Ryan","Parker Posey","Greg Kinnear"],"to":["Punchline","Catch Me If You Can","Dragnet","Saving Mr. Banks","Bachelor Party","Volunteers","Man with One Red Shoe, The","Splash","Big","Nothing in Common","Money Pit, The","Toy Story of Terror","Captain Phillips","Larry Crowne","Cloud Atlas","Angels & Demons","Extremely Loud and Incredibly Close","Charlie Wilson's War","Toy Story 3","From the Earth to the Moon","Green Mile, The","Saving Private Ryan","Toy Story 2","Apollo 13","Toy Story","League of Their Own, A","Forrest Gump","Philadelphia","Sleepless in Seattle","Turner & Hooch","'burbs, The","Joe Versus the Volcano","Bonfire of the Vanities","Terminal, The","Da Vinci Code, The","Polar Express, The","Ladykillers, The","You've Got Mail","Punchline","Punchline","Punchline","Catch Me If You Can","Catch Me If You Can","Catch Me If You Can","Dragnet","Dragnet","Dragnet","Saving Mr. Banks","Saving Mr. Banks","Saving Mr. Banks","Bachelor Party","Bachelor Party","Bachelor Party","Volunteers","Volunteers","Volunteers","Man with One Red Shoe, The","Man with One Red Shoe, The","Man with One Red Shoe, The","Splash","Splash","Splash","Big","Big","Big","Nothing in Common","Nothing in Common","Nothing in Common","Money Pit, The","Money Pit, The","Money Pit, The","Toy Story of Terror","Toy Story of Terror","Toy Story of Terror","Captain Phillips","Captain Phillips","Captain Phillips","Larry Crowne","Larry Crowne","Larry Crowne","Cloud Atlas","Cloud Atlas","Cloud Atlas","Angels & Demons","Angels & Demons","Angels & Demons","Extremely Loud and Incredibly Close","Extremely Loud and Incredibly Close","Extremely Loud and Incredibly Close","Charlie Wilson's War","Charlie Wilson's War","Charlie Wilson's War","Toy Story 3","Toy Story 3","Toy Story 3","From the Earth to the Moon","From the Earth to the Moon","From the Earth to the Moon","Green Mile, The","Green Mile, The","Green Mile, The","Saving Private Ryan","Saving Private Ryan","Saving Private Ryan","Toy Story 2","Toy Story 2","Toy Story 2","Apollo 13","Apollo 13","Apollo 13","Toy Story","Toy Story","Toy Story","League of Their Own, A","League of Their Own, A","League of Their Own, A","Forrest Gump","Forrest Gump","Forrest Gump","Philadelphia","Philadelphia","Philadelphia","Sleepless in Seattle","Sleepless in Seattle","Sleepless in Seattle","Turner & Hooch","Turner & Hooch","Turner & Hooch","'burbs, The","'burbs, The","'burbs, The","Joe Versus the Volcano","Joe Versus the Volcano","Joe Versus the Volcano","Bonfire of the Vanities","Bonfire of the Vanities","Bonfire of the Vanities","Terminal, The","Terminal, The","Terminal, The","Da Vinci Code, The","Da Vinci Code, The","Da Vinci Code, The","Polar Express, The","Polar Express, The","Polar Express, The","Ladykillers, The","Ladykillers, The","Ladykillers, The","You've Got Mail","You've Got Mail","You've Got Mail"],"role":["Steven Gold","Carl Hanratty","Pep Streebeck","Walt Disney","Rick Gassko","Lawrence Whatley Bourne III","Richard Harlan Drew","Allen Bauer","Joshua \"Josh\" Baskin","David Basner","Walter Fielding, Jr.","Woody (Voice)","Captain Richard Phillips","Larry Crowne","Dr. Henry Goose / Hotel Manager / Isaac Sachs / Dermot Hoggins / Cavendish Look-a-Like Actor / Zachry","Robert Langdon","Thomas Schell","Charlie Wilson","Woody (voice)",null,"Paul Edgecomb","Captain John H. Miller","Woody (voice)","Jim Lovell","Woody (voice)","Jimmy Dugan - Manager","Forrest Gump","Andrew Beckett","Sam Baldwin","Scott Turner","Ray Peterson","Joe Banks","Sherman McCoy","Viktor Navorski","Robert Langdon","Hero Boy / Father / Conductor / Hobo / Scrooge / Santa Claus (voice)","Professor G.H. Dorr","Joe Fox","Lilah Krytsick","Romeo","John Krytsick","Roger Strong","Frank Abagnale Jr.","Frank Abagnale","Sgt. Joe Friday","Captain Gannon","Reverend Jonathan Whirley","Travers Robert Goff","P.L. Travers","Ginty","Debbie Thompson","Jay O'Neill","Ed Thompson","John Reynolds","Beth Wexler","Tom Tuttle","Cooper","Maddy","Ross","Walter Kornbluth","Freddie Bauer","Madison","Paul","Susan","MacMillan",null,"Lorraine Basner","Max Basner","Max Beissart","Anna Crowley","Estelle","Buzz Lightyear (Voice)","Jessie (Voice)","Combat Carl / Combat Carl Jr. (Voice)","Bilal","Andrea Phillips","Muse","Samantha","Alvarez","Trainee Wong","Haskell Moore / Tadeusz Kesselring / Bill Smoke / Nurse Noakes / Boardman Mephi / Old Georgie","Captain Molyneux / Vyvyan Ayrs / Timothy Cavendish / Korean Musician / Prescient 2","Native Woman / Jocasta Ayrs / Luisa Rey / Indian Party Guest / Ovid / Meronym","Commander Richter","Vittoria Vetra","Camerlengo Patrick McKenna","Oskar Schell","Oskar's Grandmother","Linda Schell","Bonnie Bach","Gust Avrakotos","Joanne Herring","Buzz Lightyear (voice)","Lotso (voice)","Jessie the Yodeling Cowgirl (voice)",null,null,null,"Jan Edgecomb","John Coffey","Brutus \"Brutal\" Howell","Technical Sergeant Michael Horvath","Private Richard Reiben","Private Daniel Jackson","Stinky Pete the Prospector (voice)","Buzz Lightyear (voice)","Jessie the Yodeling Cowgirl (voice)","Fred Haise","Jack Swigert","Ken Mattingly","Slinky Dog (voice)","Buzz Lightyear (voice)","Mr. Potato Head (voice)","Dottie Hinson - Catcher","Kit Keller - Pitcher","Mae Mordabito - Center Field","Jenny Curran","Mrs. Gump","Young Forrest Gump","Judge Tate","Joe Miller","Crutches","Greg","Suzy","Jonah Baldwin","Howard Hyde","Det. David Sutton","Emily Carson","Art Weingartner","Carol Peterson","Lt. Mark Rumsfield","DeDe/Angelica Graynamore/Patricia Graynamore","Dr. Ellison","Samuel Harvey Graynamore","Peter Fallow","Maria Ruskin","Judy McCoy","Amelia Warren","Mulroy","Frank Dixon","Sophie Neveu","Captain Bezu Fache","Sir Leigh Teabing","Know-It-All (voice)","Sister Sarah / Mother (voice)","Hero Girl (voice)","Marva Munson","Gawain MacSam","Garth Pancake","Kathleen Kelly","Patricia Eden","Frank Navasky"],"title":["<b>Role<\/b>: Steven Gold","<b>Role<\/b>: Carl Hanratty","<b>Role<\/b>: Pep Streebeck","<b>Role<\/b>: Walt Disney","<b>Role<\/b>: Rick Gassko","<b>Role<\/b>: Lawrence Whatley Bourne III","<b>Role<\/b>: Richard Harlan Drew","<b>Role<\/b>: Allen Bauer","<b>Role<\/b>: Joshua \"Josh\" Baskin","<b>Role<\/b>: David Basner","<b>Role<\/b>: Walter Fielding, Jr.","<b>Role<\/b>: Woody (Voice)","<b>Role<\/b>: Captain Richard Phillips","<b>Role<\/b>: Larry Crowne","<b>Role<\/b>: Dr. Henry Goose / Hotel Manager / Isaac Sachs / Dermot Hoggins / Cavendish Look-a-Like Actor / Zachry","<b>Role<\/b>: Robert Langdon","<b>Role<\/b>: Thomas Schell","<b>Role<\/b>: Charlie Wilson","<b>Role<\/b>: Woody (voice)","<b>Role<\/b>: NA","<b>Role<\/b>: Paul Edgecomb","<b>Role<\/b>: Captain John H. Miller","<b>Role<\/b>: Woody (voice)","<b>Role<\/b>: Jim Lovell","<b>Role<\/b>: Woody (voice)","<b>Role<\/b>: Jimmy Dugan - Manager","<b>Role<\/b>: Forrest Gump","<b>Role<\/b>: Andrew Beckett","<b>Role<\/b>: Sam Baldwin","<b>Role<\/b>: Scott Turner","<b>Role<\/b>: Ray Peterson","<b>Role<\/b>: Joe Banks","<b>Role<\/b>: Sherman McCoy","<b>Role<\/b>: Viktor Navorski","<b>Role<\/b>: Robert Langdon","<b>Role<\/b>: Hero Boy / Father / Conductor / Hobo / Scrooge / Santa Claus (voice)","<b>Role<\/b>: Professor G.H. Dorr","<b>Role<\/b>: Joe Fox","<b>Role<\/b>: Lilah Krytsick","<b>Role<\/b>: Romeo","<b>Role<\/b>: John Krytsick","<b>Role<\/b>: Roger Strong","<b>Role<\/b>: Frank Abagnale Jr.","<b>Role<\/b>: Frank Abagnale","<b>Role<\/b>: Sgt. Joe Friday","<b>Role<\/b>: Captain Gannon","<b>Role<\/b>: Reverend Jonathan Whirley","<b>Role<\/b>: Travers Robert Goff","<b>Role<\/b>: P.L. Travers","<b>Role<\/b>: Ginty","<b>Role<\/b>: Debbie Thompson","<b>Role<\/b>: Jay O'Neill","<b>Role<\/b>: Ed Thompson","<b>Role<\/b>: John Reynolds","<b>Role<\/b>: Beth Wexler","<b>Role<\/b>: Tom Tuttle","<b>Role<\/b>: Cooper","<b>Role<\/b>: Maddy","<b>Role<\/b>: Ross","<b>Role<\/b>: Walter Kornbluth","<b>Role<\/b>: Freddie Bauer","<b>Role<\/b>: Madison","<b>Role<\/b>: Paul","<b>Role<\/b>: Susan","<b>Role<\/b>: MacMillan","<b>Role<\/b>: NA","<b>Role<\/b>: Lorraine Basner","<b>Role<\/b>: Max Basner","<b>Role<\/b>: Max Beissart","<b>Role<\/b>: Anna Crowley","<b>Role<\/b>: Estelle","<b>Role<\/b>: Buzz Lightyear (Voice)","<b>Role<\/b>: Jessie (Voice)","<b>Role<\/b>: Combat Carl / Combat Carl Jr. (Voice)","<b>Role<\/b>: Bilal","<b>Role<\/b>: Andrea Phillips","<b>Role<\/b>: Muse","<b>Role<\/b>: Samantha","<b>Role<\/b>: Alvarez","<b>Role<\/b>: Trainee Wong","<b>Role<\/b>: Haskell Moore / Tadeusz Kesselring / Bill Smoke / Nurse Noakes / Boardman Mephi / Old Georgie","<b>Role<\/b>: Captain Molyneux / Vyvyan Ayrs / Timothy Cavendish / Korean Musician / Prescient 2","<b>Role<\/b>: Native Woman / Jocasta Ayrs / Luisa Rey / Indian Party Guest / Ovid / Meronym","<b>Role<\/b>: Commander Richter","<b>Role<\/b>: Vittoria Vetra","<b>Role<\/b>: Camerlengo Patrick McKenna","<b>Role<\/b>: Oskar Schell","<b>Role<\/b>: Oskar's Grandmother","<b>Role<\/b>: Linda Schell","<b>Role<\/b>: Bonnie Bach","<b>Role<\/b>: Gust Avrakotos","<b>Role<\/b>: Joanne Herring","<b>Role<\/b>: Buzz Lightyear (voice)","<b>Role<\/b>: Lotso (voice)","<b>Role<\/b>: Jessie the Yodeling Cowgirl (voice)","<b>Role<\/b>: NA","<b>Role<\/b>: NA","<b>Role<\/b>: NA","<b>Role<\/b>: Jan Edgecomb","<b>Role<\/b>: John Coffey","<b>Role<\/b>: Brutus \"Brutal\" Howell","<b>Role<\/b>: Technical Sergeant Michael Horvath","<b>Role<\/b>: Private Richard Reiben","<b>Role<\/b>: Private Daniel Jackson","<b>Role<\/b>: Stinky Pete the Prospector (voice)","<b>Role<\/b>: Buzz Lightyear (voice)","<b>Role<\/b>: Jessie the Yodeling Cowgirl (voice)","<b>Role<\/b>: Fred Haise","<b>Role<\/b>: Jack Swigert","<b>Role<\/b>: Ken Mattingly","<b>Role<\/b>: Slinky Dog (voice)","<b>Role<\/b>: Buzz Lightyear (voice)","<b>Role<\/b>: Mr. Potato Head (voice)","<b>Role<\/b>: Dottie Hinson - Catcher","<b>Role<\/b>: Kit Keller - Pitcher","<b>Role<\/b>: Mae Mordabito - Center Field","<b>Role<\/b>: Jenny Curran","<b>Role<\/b>: Mrs. Gump","<b>Role<\/b>: Young Forrest Gump","<b>Role<\/b>: Judge Tate","<b>Role<\/b>: Joe Miller","<b>Role<\/b>: Crutches","<b>Role<\/b>: Greg","<b>Role<\/b>: Suzy","<b>Role<\/b>: Jonah Baldwin","<b>Role<\/b>: Howard Hyde","<b>Role<\/b>: Det. David Sutton","<b>Role<\/b>: Emily Carson","<b>Role<\/b>: Art Weingartner","<b>Role<\/b>: Carol Peterson","<b>Role<\/b>: Lt. Mark Rumsfield","<b>Role<\/b>: DeDe/Angelica Graynamore/Patricia Graynamore","<b>Role<\/b>: Dr. Ellison","<b>Role<\/b>: Samuel Harvey Graynamore","<b>Role<\/b>: Peter Fallow","<b>Role<\/b>: Maria Ruskin","<b>Role<\/b>: Judy McCoy","<b>Role<\/b>: Amelia Warren","<b>Role<\/b>: Mulroy","<b>Role<\/b>: Frank Dixon","<b>Role<\/b>: Sophie Neveu","<b>Role<\/b>: Captain Bezu Fache","<b>Role<\/b>: Sir Leigh Teabing","<b>Role<\/b>: Know-It-All (voice)","<b>Role<\/b>: Sister Sarah / Mother (voice)","<b>Role<\/b>: Hero Girl (voice)","<b>Role<\/b>: Marva Munson","<b>Role<\/b>: Gawain MacSam","<b>Role<\/b>: Garth Pancake","<b>Role<\/b>: Kathleen Kelly","<b>Role<\/b>: Patricia Eden","<b>Role<\/b>: Frank Navasky"],"arrows":["to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot"},"manipulation":{"enabled":false},"groups":{"hub":{"color":{"background":"#3B82F6","border":"#1D4ED8","highlight":"#93C5FD"}},"movie":{"color":{"background":"#F97316","border":"#C2410C","highlight":"#FED7AA"},"shape":"square"},"useDefaultGroups":true,"costar":{"color":{"background":"#6B7280","border":"#374151","highlight":"#D1D5DB"}}},"edges":{"width":1.5,"color":{"color":"#CBD5E1","highlight":"#3B82F6"}},"interaction":{"hover":true,"zoomSpeed":1},"layout":{"randomSeed":42},"physics":{"solver":"forceAtlas2Based","forceAtlas2Based":{"gravitationalConstant":-60,"springLength":120,"springConstant":0.04}}},"groups":["Movie","Co-star","Hub"],"width":null,"height":null,"idselection":{"enabled":true,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);","highlight":{"enabled":true,"hoverNearest":true,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":false,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":true,"position":"right","ncol":1,"stepX":100,"stepY":100,"zoom":true,"main":{"text":"Node type","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:14px;text-align:center;"}}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>Hover over any node to see its label. Use the <strong>Select by id</strong> dropdown or a node to highlight movies shared with Tom Hanks.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">7</span> Conclusion</h2>
+<p>neo2R 3.0.0 removes the last friction point for R users who want to work with <strong>Neo4j Aura</strong>: a single <code>startGraph()</code> call now handles cloud and local instances uniformly, the httr2 backend gives reliable retries and clean error handling, and the Cypher query interface remains exactly as it was.</p>
+<section id="further-reading" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">7.1</span> Further reading</h3>
+<ul>
+<li><a href="https://cran.r-project.org/package=neo2R">neo2R on CRAN</a> — package documentation</li>
+<li><a href="https://github.com/patzaw/neo2R">neo2R GitHub</a> — source, changelog, and issues</li>
+<li><a href="https://console.neo4j.io">Neo4j Aura console</a> — create your free instance</li>
+<li><a href="https://neo4j.com/docs/cypher-manual/current/">Neo4j Cypher reference</a> — query language docs</li>
+<li><a href="https://datastorm-open.github.io/visNetwork/">visNetwork documentation</a> — all chart options</li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/patzaw\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<script src="https://utteranc.es/client.js" repo="patzaw/blogComments" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2024 Patrice Godard<br>Made with <a href="https://quarto.org/">Quarto</a></p>
+</div>   
+    <div class="nav-footer-center">
+
+</div>
+    <div class="nav-footer-right">
+<p><a href="../license.html">License</a><br><span id="open_preferences_center">Cookie Preferences</span></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
