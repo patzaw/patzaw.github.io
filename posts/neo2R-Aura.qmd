@@ -252,7 +252,7 @@ nodes_raw <- cypher(
 
 ### Step 2 — Shape data for visNetwork
 
-visNetwork expects two data frames: `nodes
+visNetwork expects two data frames: `nodes`
 (with columns `id`, `label`, `group`, …)
 and `edges` (with columns `from`, `to`, …).
 
