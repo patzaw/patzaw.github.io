@@ -7,17 +7,18 @@ categories:
    - Neo4j
    - Graph Databases
    - Network Analysis
-image: "images/bscui.png"
+image: "images/neo2R-Aura.png"
 editor_options: 
   chunk_output_type: console
 ---
+
+![](images/neo2R-Aura.png){fig-alt="Illustration of neo2R used to connect to Aura, generated with Gemini" width="800"}
 
 <script src="https://patzaw.github.io/site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
 <link rel="stylesheet" href="https://patzaw.github.io/site_libs/vis-9.1.0/vis-network.min.css">
 <script src="https://patzaw.github.io/site_libs/vis-9.1.0/vis-network.min.js"></script>
 <script src="https://patzaw.github.io/site_libs/visNetwork-binding-2.1.4/visNetwork.js"></script>
 
-![](images/neo2R-Aura.png){fig-alt="Illustration of neo2R used to connect to Aura, generated with Gemini" width="800"}
 
 ## Introduction
 
