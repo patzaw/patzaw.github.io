@@ -71,7 +71,7 @@ The aim of the BED (Biological Entity Dictionary) R package is to get and explor
 
  - [Package website](https://patzaw.github.io/BED/)
  - [Publication](https://doi.org/10.12688/f1000research.13925.3)
- - [Docker image of the database](https://hub.docker.com/r/patzaw/bed-ucb-human/)
+ - [Graph dump](https://zenodo.org/doi/10.5281/zenodo.11069700)
  - An [instance](https://www.genodesy.org/services.htmld#bed) of the BED database is running at [GENODESY]{.tm}
 :::
 :::
@@ -102,9 +102,17 @@ Phenotype Consensus Analysis (PCAN) is an indirect phenotype-based method that q
 
 ### neo2R
 
+::: columns
+::: {.column style="width:15%; padding-right:3px; padding-top:10px;"}
+[![](images/neo2R.png)](https://patzaw.github.io/neo2R/)
+:::
+
+::: {.column style="width:85%; padding-left:10px;"}
 The aim of the neo2R is to provide simple and low level connectors for querying [Neo4j](https://neo4j.com/) graph databases from R. The objects returned by the query functions are either lists or data.frames with very few post-processing. It allows fast processing of queries returning many records. And it let the user handle post-processing according to the data model and his needs.
 
-- [Package website](https://github.com/patzaw/neo2r)
+- [Package website](https://patzaw.github.io/neo2R/)
+:::
+:::
 
 ### ClickHouseHTTP
 
