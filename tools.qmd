@@ -116,6 +116,14 @@ The aim of the neo2R is to provide simple and low level connectors for querying 
 
 ### ClickHouseHTTP
 
+::: columns
+::: {.column style="width:15%; padding-right:3px; padding-top:10px;"}
+[![](images/ClickHouseHTTP.png)](https://patzaw.github.io/ClickHouseHTTP/)
+:::
+
+::: {.column style="width:85%; padding-left:10px;"}
 [ClickHouse](https://clickhouse.com/) is an open-source, high performance columnar OLAP (online analytical processing of queries) database management system for real-time analytics using SQL. This R DBI backend relies on the ClickHouse HTTP interface and support the HTTPS protocol.
 
-- [Package website](https://github.com/patzaw/ClickHouseHTTP)
+- [Package website](https://patzaw.github.io/ClickHouseHTTP/)
+:::
+:::
