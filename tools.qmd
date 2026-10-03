@@ -72,7 +72,7 @@ The aim of the BED (Biological Entity Dictionary) R package is to get and explor
  - [Package website](https://patzaw.github.io/BED/)
  - [Publication](https://doi.org/10.12688/f1000research.13925.3)
  - [Graph dump](https://zenodo.org/doi/10.5281/zenodo.11069700)
- - An [instance](https://www.genodesy.org/services.htmld#bed) of the BED database is running at [GENODESY]{.tm}
+ - An [instance](https://www.genodesy.org/services.html#bed) of the BED database is running at [GENODESY]{.tm}
 :::
 :::
 
